@@ -48,7 +48,7 @@
   .section{ margin:16px 0 10px 0; }
   .section-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
   .section-name{ font-family:'Kalam',cursive; font-size:19px; font-weight:700; color:var(--pen-dark); border-bottom:2px solid var(--pen);
-    padding-bottom:1px; background:transparent; border-top:none; border-left:none; border-right:none; outline:none; width:auto; max-width:70%; }
+    padding-bottom:2px; outline:none; flex:1; min-width:0; white-space:normal; word-break:break-word; line-height:1.3; }
   .section-del{ background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:2px 4px; }
   ul.tasks{list-style:none; margin:6px 0 4px 0; padding:0;}
   li.task{ display:flex; align-items:flex-start; gap:9px; padding:6px 2px; }
@@ -199,7 +199,38 @@
     var raw = await storageGet("diary:"+dateStr);
     if(raw){ try{ return JSON.parse(raw); }catch(e){} }
     var cats = await loadMasterCats();
-    return { categories: cats.map(function(name){ return {id:uid(), name:name, tasks:[]}; }) };
+    var prior = await findMostRecentPriorDay(dateStr, 30);
+    var priorByName = {};
+    if(prior){ prior.categories.forEach(function(c){ priorByName[c.name] = c; }); }
+    var categories = cats.map(function(name){
+      var carried = [];
+      var pc = priorByName[name];
+      if(pc){
+        pc.tasks.forEach(function(t){
+          if(!t.done){
+            carried.push({
+              id: uid(),
+              text: t.text,
+              done: false,
+              subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done}; })
+            });
+          }
+        });
+      }
+      return {id:uid(), name:name, tasks:carried};
+    });
+    return { categories: categories };
+  }
+  async function findMostRecentPriorDay(dateStr, maxLookback){
+    var d = parseDate(dateStr);
+    for(var i=1; i<=maxLookback; i++){
+      var prev = new Date(d.getTime());
+      prev.setDate(prev.getDate()-i);
+      var prevStr = prev.getFullYear()+"-"+pad(prev.getMonth()+1)+"-"+pad(prev.getDate());
+      var raw = await storageGet("diary:"+prevStr);
+      if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+    }
+    return null;
   }
   async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
   async function ensureMasterHasAll(data){
@@ -393,22 +424,33 @@
       sec.className = "section";
       var head = document.createElement("div");
       head.className = "section-head";
-      var nameInput = document.createElement("input");
+      var nameInput = document.createElement("div");
       nameInput.className = "section-name";
-      nameInput.value = cat.name;
-      nameInput.addEventListener("change", async function(){
+      nameInput.contentEditable = "true";
+      nameInput.spellcheck = false;
+      nameInput.textContent = cat.name;
+      nameInput.addEventListener("blur", async function(){
         var oldName = cat.name;
-        cat.name = nameInput.value.trim() || oldName;
+        var newName = nameInput.textContent.trim() || oldName;
+        cat.name = newName;
+        nameInput.textContent = newName;
         persist();
         var master = await loadMasterCats();
         var idx = master.indexOf(oldName);
-        if(idx>-1){ master[idx]=cat.name; await saveMasterCats(master); }
+        if(idx>-1){ master[idx]=newName; await saveMasterCats(master); }
+      });
+      nameInput.addEventListener("keydown", function(e){
+        if(e.key === "Enter"){ e.preventDefault(); nameInput.blur(); }
       });
       var delBtn = document.createElement("button");
-      delBtn.className = "section-del"; delBtn.textContent = "✕"; delBtn.title = "Remove this section for today";
-      delBtn.addEventListener("click", function(){
+      delBtn.className = "section-del"; delBtn.textContent = "✕"; delBtn.title = "Remove this section for good";
+      delBtn.addEventListener("click", async function(){
+        if(!confirm('Remove "'+cat.name+'"? It won\'t carry forward to future days.')) return;
         state.data.categories = state.data.categories.filter(function(c){return c.id!==cat.id;});
         persist(); renderSections();
+        var master = await loadMasterCats();
+        var idx = master.indexOf(cat.name);
+        if(idx>-1){ master.splice(idx,1); await saveMasterCats(master); }
       });
       head.appendChild(nameInput); head.appendChild(delBtn); sec.appendChild(head);
 
