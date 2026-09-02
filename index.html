@@ -13,7 +13,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   :root{
     --paper:#FAF6EA; --paper-line:#CBD5DE; --margin-red:#C64B54; --ink:#2B2A28;
@@ -278,28 +277,36 @@
   }
 
   async function connectDrive(silent){
-    return new Promise(function(resolve){
-      if(!window.google || !google.accounts || !google.accounts.oauth2){
-        resolve(false); return;
-      }
-      if(!drive.tokenClient){
-        drive.tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: drive.clientId,
-          scope: GDRIVE_SCOPE,
-          callback: function(resp){
-            if(resp && resp.access_token){
-              drive.accessToken = resp.access_token;
-              drive.signedIn = true;
-              resolve(true);
-            } else { resolve(false); }
-          },
-          error_callback: function(){ resolve(false); }
-        });
-      }
-      try{
-        drive.tokenClient.requestAccessToken({ prompt: silent ? "none" : "consent" });
-      }catch(e){ resolve(false); }
+    if(silent) return false;
+    var redirectUri = window.location.origin + window.location.pathname;
+    var params = new URLSearchParams({
+      client_id: drive.clientId,
+      redirect_uri: redirectUri,
+      response_type: "token",
+      scope: GDRIVE_SCOPE,
+      include_granted_scopes: "true",
+      prompt: "consent"
     });
+    window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
+    return new Promise(function(){});
+  }
+
+  function parseTokenFromHash(){
+    if(location.hash && location.hash.indexOf("access_token") !== -1){
+      var params = new URLSearchParams(location.hash.substring(1));
+      var token = params.get("access_token");
+      history.replaceState(null, "", location.pathname + location.search);
+      if(token){
+        drive.accessToken = token;
+        drive.signedIn = true;
+        return true;
+      }
+    }
+    if(location.hash && location.hash.indexOf("error=") !== -1){
+      history.replaceState(null, "", location.pathname + location.search);
+      showToast("Google sign-in was cancelled");
+    }
+    return false;
   }
 
   async function initDriveSync(){
@@ -311,21 +318,17 @@
       return;
     }
     drive.clientId = savedId;
-    setSyncStatus("Connecting to Drive…");
-    var ok = await connectDrive(true);
-    if(!ok){
-      function offerSignIn(){
-        setSyncStatus("Not signed in", "Sign in with Google", async function(){
-          setSyncStatus("Opening Google sign-in…");
-          var signedIn = await connectDrive(false);
-          if(signedIn){ await finishDriveConnect(); }
-          else { offerSignIn(); }
-        });
-      }
-      offerSignIn();
+    if(parseTokenFromHash()){
+      await finishDriveConnect();
       return;
     }
-    await finishDriveConnect();
+    function offerSignIn(){
+      setSyncStatus("Not signed in", "Sign in with Google", function(){
+        setSyncStatus("Opening Google sign-in…");
+        connectDrive(false);
+      });
+    }
+    offerSignIn();
   }
 
   async function finishDriveConnect(){
