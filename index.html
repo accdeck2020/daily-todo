@@ -44,45 +44,43 @@
   .setup p{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 10px 0; }
   .setup input{ width:100%; font-size:14px; padding:9px 10px; border:1.5px solid var(--border); border-radius:8px; margin-bottom:8px; background:#fff; color:var(--ink); }
   .setup button{ background:var(--pen); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-size:13px; cursor:pointer; }
-  .setup button.secondary{ background:var(--card); color:var(--pen-dark); border:1.5px solid var(--border); margin-left:8px; }
-  .section{ margin:16px 0 10px 0; }
-  .section-head{ display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:2px; }
-  .section-name{ font-family:'Kalam',cursive; font-size:19px; font-weight:700; color:var(--pen-dark); border-bottom:2px solid var(--pen);
-    padding-bottom:2px; outline:none; flex:1; min-width:0; white-space:normal; word-break:break-word; line-height:1.3; }
-  .section-del{ background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:2px 4px; }
-  ul.tasks{list-style:none; margin:6px 0 4px 0; padding:0;}
-  li.task{ display:flex; align-items:flex-start; gap:9px; padding:6px 2px; }
-  .bullet{ flex:0 0 auto; width:18px; height:18px; margin-top:2px; border-radius:50%; border:2px solid var(--ink);
+
+  .maintask{ margin:18px 0; }
+  .mt-row{ display:flex; align-items:flex-start; gap:9px; }
+  .bullet{ flex:0 0 auto; width:22px; height:22px; margin-top:2px; border-radius:50%; border:2.5px solid var(--pen);
     display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--card); }
-  li.task.done .bullet{ border-color:var(--done); background:var(--done); }
-  .bullet svg{width:11px; height:11px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
-  li.task.done .bullet svg{opacity:1;}
-  .task-text-wrap{ flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; }
-  .task-text{ font-size:16px; line-height:1.4; padding-top:1px; word-break:break-word; outline:none; }
-  li.task.done .task-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
-  .task-label{ align-self:flex-start; font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--pen); color:var(--pen-dark);
+  .maintask.done .bullet{ border-color:var(--done); background:var(--done); }
+  .bullet svg{width:13px; height:13px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
+  .maintask.done .bullet svg{opacity:1;}
+  .mt-text-wrap{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
+  .mt-label{ align-self:flex-start; font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--pen); color:var(--pen-dark);
     border-radius:10px; padding:1px 8px; cursor:pointer; }
-  .task-label-toggle{ flex:0 0 auto; background:none; border:none; font-size:13px; cursor:pointer; padding:0 3px; opacity:0.55; }
-  .task-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:0 3px; opacity:0.5; }
-  .task-sub-toggle{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:15px; cursor:pointer; padding:0 3px; opacity:0.6; }
-  li.task.targeted{ background:var(--card); border-radius:8px; box-shadow:inset 0 0 0 1.5px var(--pen); }
-  ul.subtasks{ list-style:none; margin:2px 0 6px 27px; padding:0; border-left:2px solid var(--border); padding-left:12px; }
-  li.subtask{ display:flex; align-items:flex-start; gap:8px; padding:4px 2px; }
-  .sub-bullet{ flex:0 0 auto; width:14px; height:14px; margin-top:3px; border-radius:50%; border:1.7px solid var(--ink-soft);
+  .mt-text{ font-family:'Kalam',cursive; font-size:20px; font-weight:700; color:var(--pen-dark); outline:none;
+    white-space:normal; word-break:break-word; line-height:1.3; border-bottom:2px solid transparent; }
+  .mt-text:focus{ border-bottom:2px solid var(--pen); }
+  .maintask.done .mt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  .mt-label-toggle{ flex:0 0 auto; background:none; border:none; font-size:15px; cursor:pointer; padding:4px 3px; opacity:0.55; }
+  .mt-sub-toggle{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:17px; cursor:pointer; padding:4px 3px; opacity:0.7; }
+  .mt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:4px 3px; opacity:0.5; }
+  .maintask.targeted .mt-row{ background:var(--card); border-radius:8px; box-shadow:inset 0 0 0 1.5px var(--pen); }
+
+  ul.tinytasks{list-style:none; margin:6px 0 4px 27px; padding:0 0 0 12px; border-left:2px solid var(--border);}
+  li.tinytask{ display:flex; align-items:flex-start; gap:8px; padding:5px 2px; }
+  .tt-bullet{ flex:0 0 auto; width:16px; height:16px; margin-top:3px; border-radius:50%; border:1.7px solid var(--ink-soft);
     display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--card); }
-  li.subtask.done .sub-bullet{ border-color:var(--done); background:var(--done); }
-  .sub-bullet svg{width:8px; height:8px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
-  li.subtask.done .sub-bullet svg{opacity:1;}
-  .subtask-text{ flex:1; font-size:14.5px; line-height:1.4; padding-top:1px; color:var(--ink); outline:none; }
-  li.subtask.done .subtask-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
-  .subtask-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer; padding:0 3px; opacity:0.5; }
-  .subtask-add-row{ display:flex; align-items:center; gap:8px; margin:2px 0 8px 27px; padding-left:12px; border-left:2px solid var(--pen); }
-  .subtask-add-row input{ flex:1; font-size:14px; border:none; border-bottom:1.5px dashed var(--border); background:transparent; padding:5px 2px; outline:none; color:var(--ink); }
-  .subtask-add-row .hint{ font-size:11.5px; color:var(--pen-dark); white-space:nowrap; }
-  .empty-hint{ font-size:13px; color:var(--ink-soft); font-style:italic; padding:2px 2px 8px 2px; }
-  .add-category{ display:flex; align-items:center; gap:8px; margin:20px 2px 4px 2px; }
-  .add-category input{ flex:1; font-family:'Kalam',cursive; font-size:16px; border:none; border-bottom:2px dashed var(--border); background:transparent; padding:5px 2px; outline:none; color:var(--ink-soft); }
-  .add-category button{ background:var(--card); border:1.5px solid var(--border); border-radius:8px; padding:6px 10px; font-size:13px; color:var(--pen-dark); cursor:pointer; }
+  li.tinytask.done .tt-bullet{ border-color:var(--done); background:var(--done); }
+  .tt-bullet svg{width:9px; height:9px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
+  li.tinytask.done .tt-bullet svg{opacity:1;}
+  .tt-text{ flex:1; font-size:15px; line-height:1.4; padding-top:1px; color:var(--ink); outline:none; }
+  li.tinytask.done .tt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  .tt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer; padding:0 3px; opacity:0.5; }
+
+  .tt-add-row{ display:flex; align-items:center; gap:8px; margin:2px 0 8px 27px; padding-left:12px; border-left:2px solid var(--pen); }
+  .tt-add-row input{ flex:1; font-size:14px; border:none; border-bottom:1.5px dashed var(--border); background:transparent; padding:5px 2px; outline:none; color:var(--ink); }
+  .tt-add-row .hint{ font-size:11.5px; color:var(--pen-dark); white-space:nowrap; }
+
+  .empty-hint{ font-size:13px; color:var(--ink-soft); font-style:italic; padding:24px 2px; text-align:center; }
+
   .dock{ position:fixed; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; gap:14px;
     padding:14px 18px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--paper) 60%, rgba(250,246,234,0)); }
   .textadd{ flex:1; max-width:420px; background:var(--card); border:1.5px solid var(--border); border-radius:22px; padding:11px 16px; font-size:15px; font-family:'Inter',sans-serif; outline:none; color:var(--ink); }
@@ -94,14 +92,6 @@
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:var(--ink); color:var(--paper); font-size:13px;
     padding:8px 14px; border-radius:20px; opacity:0; transition:opacity .2s; pointer-events:none; max-width:80%; text-align:center; }
   .toast.show{opacity:0.92;}
-  .catpicker{ position:fixed; inset:0; background:rgba(43,42,40,0.35); display:none; align-items:flex-end; justify-content:center; z-index:20; }
-  .catpicker.open{display:flex;}
-  .catpicker-sheet{ background:var(--paper); width:100%; max-width:640px; border-radius:16px 16px 0 0; padding:16px 18px calc(18px + env(safe-area-inset-bottom)); border-top:1.5px solid var(--border); }
-  .catpicker-sheet h3{font-family:'Kalam',cursive; margin:0 0 10px 0; font-size:18px;}
-  .catpicker-list{display:flex; flex-wrap:wrap; gap:8px;}
-  .catpicker-list button{ background:var(--card); border:1.5px solid var(--border); border-radius:20px; padding:8px 14px; font-size:14px; cursor:pointer; color:var(--ink); }
-  .catpicker-list button.new{color:var(--pen-dark); border-color:var(--pen);}
-  .catpicker-cancel{ display:block; width:100%; margin-top:14px; background:none; border:none; color:var(--ink-soft); font-size:14px; padding:8px; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -129,37 +119,23 @@
     <button id="saveClientIdBtn">Save and continue</button>
   </div>
 
-  <div id="sections"></div>
-
-  <div class="add-category">
-    <input id="newCatInput" placeholder="Add a new section (e.g. a name or topic)" />
-    <button id="addCatBtn">Add</button>
-  </div>
+  <div id="mainTasks"></div>
 </div>
 
 <div class="voice-status" id="voiceStatus"></div>
 <div class="toast" id="toast"></div>
 
-<div class="catpicker" id="catPicker">
-  <div class="catpicker-sheet">
-    <h3 id="catPickerHeard"></h3>
-    <div class="catpicker-list" id="catPickerList"></div>
-    <button class="catpicker-cancel" id="catPickerCancel">Cancel</button>
-  </div>
-</div>
-
 <div class="dock">
-  <input class="textadd" id="textAdd" placeholder="Type a task, or tap the mic">
+  <input class="textadd" id="textAdd" placeholder="Type a main task, or tap the mic">
   <button class="mic" id="micBtn" aria-label="Add task by voice">🎤</button>
 </div>
 
 <script>
 (function(){
-  var DEFAULT_CATS = ["General"];
   var GDRIVE_FILE_NAME = "diary-todo-sync.json";
   var GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
   var state = { date: todayStr(), data: null, activeTarget: null };
-  var drive = { clientId:null, tokenClient:null, accessToken:null, fileId:null, signedIn:false };
+  var drive = { clientId:null, accessToken:null, fileId:null, signedIn:false };
   var blob = null;
   var pushTimer = null;
 
@@ -171,9 +147,7 @@
     try{ var raw = localStorage.getItem("gdrive_blob_cache"); if(raw) return JSON.parse(raw); }catch(e){}
     return { updatedAt:0, kv:{} };
   }
-  function saveLocalCache(b){
-    try{ localStorage.setItem("gdrive_blob_cache", JSON.stringify(b)); }catch(e){}
-  }
+  function saveLocalCache(b){ try{ localStorage.setItem("gdrive_blob_cache", JSON.stringify(b)); }catch(e){} }
 
   async function storageGet(key){
     if(!blob) blob = loadLocalCache();
@@ -186,45 +160,30 @@
     saveLocalCache(blob);
     schedulePush();
   }
-
   function schedulePush(){
     if(!drive.signedIn) return;
     clearTimeout(pushTimer);
     pushTimer = setTimeout(pushToDrive, 1000);
   }
 
-  async function loadMasterCats(){
-    var raw = await storageGet("diary:categories");
-    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
-    return DEFAULT_CATS.slice();
-  }
-  async function saveMasterCats(cats){ await storageSet("diary:categories", JSON.stringify(cats)); }
   async function loadDay(dateStr){
     var raw = await storageGet("diary:"+dateStr);
     if(raw){ try{ return JSON.parse(raw); }catch(e){} }
-    var cats = await loadMasterCats();
     var prior = await findMostRecentPriorDay(dateStr, 30);
-    var priorByName = {};
-    if(prior){ prior.categories.forEach(function(c){ priorByName[c.name] = c; }); }
-    var categories = cats.map(function(name){
-      var carried = [];
-      var pc = priorByName[name];
-      if(pc){
-        pc.tasks.forEach(function(t){
-          if(!t.done){
-            carried.push({
-              id: uid(),
-              text: t.text,
-              done: false,
-              subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done}; })
-            });
-          }
-        });
-      }
-      return {id:uid(), name:name, tasks:carried};
-    });
-    return { categories: categories };
+    var tasks = [];
+    if(prior && prior.tasks){
+      prior.tasks.forEach(function(t){
+        if(!t.done){
+          tasks.push({
+            id: uid(), text: t.text, done:false, label: t.label || "",
+            subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done}; })
+          });
+        }
+      });
+    }
+    return { tasks: tasks };
   }
+  async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
   async function findMostRecentPriorDay(dateStr, maxLookback){
     var d = parseDate(dateStr);
     for(var i=1; i<=maxLookback; i++){
@@ -235,13 +194,6 @@
       if(raw){ try{ return JSON.parse(raw); }catch(e){} }
     }
     return null;
-  }
-  async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
-  async function ensureMasterHasAll(data){
-    var master = await loadMasterCats();
-    var changed = false;
-    data.categories.forEach(function(c){ if(master.indexOf(c.name) === -1){ master.push(c.name); changed = true; } });
-    if(changed) await saveMasterCats(master);
   }
 
   function setSyncStatus(text, actionLabel, actionFn){
@@ -256,6 +208,23 @@
   }
   function hideSetupPanel(){ document.getElementById("setupPanel").style.display = "none"; }
 
+  function saveStoredToken(token, expiresInSeconds){
+    try{
+      var expiresAt = Date.now() + (parseInt(expiresInSeconds||"3600",10) * 1000);
+      localStorage.setItem("gdrive_token", JSON.stringify({ token: token, expiresAt: expiresAt }));
+    }catch(e){}
+  }
+  function loadStoredToken(){
+    try{
+      var raw = localStorage.getItem("gdrive_token");
+      if(!raw) return null;
+      var obj = JSON.parse(raw);
+      if(obj && obj.token && obj.expiresAt && (obj.expiresAt - Date.now() > 60000)){ return obj.token; }
+    }catch(e){}
+    return null;
+  }
+  function clearStoredToken(){ try{ localStorage.removeItem("gdrive_token"); }catch(e){} }
+
   async function driveFetch(url, opts){
     opts = opts || {};
     opts.headers = opts.headers || {};
@@ -263,8 +232,7 @@
     var res = await fetch(url, opts);
     if(res.status === 401){
       clearStoredToken();
-      drive.signedIn = false;
-      drive.accessToken = null;
+      drive.signedIn = false; drive.accessToken = null;
       setSyncStatus("Signed out (session expired)", "Sign in with Google", function(){
         setSyncStatus("Opening Google sign-in…");
         connectDrive(false);
@@ -287,9 +255,7 @@
       "--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify({updatedAt:0, kv:{}})+"\r\n"+
       "--"+boundary+"--";
     var createRes = await driveFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
-      method:"POST",
-      headers:{ "Content-Type":"multipart/related; boundary="+boundary },
-      body: body
+      method:"POST", headers:{ "Content-Type":"multipart/related; boundary="+boundary }, body: body
     });
     var createJson = await createRes.json();
     return createJson.id;
@@ -299,21 +265,14 @@
     var res = await driveFetch("https://www.googleapis.com/drive/v3/files/"+drive.fileId+"?alt=media");
     var remote = await res.json();
     var local = blob || loadLocalCache();
-    if((remote.updatedAt||0) >= (local.updatedAt||0)){
-      blob = remote;
-    } else {
-      blob = local;
-    }
+    blob = (remote.updatedAt||0) >= (local.updatedAt||0) ? remote : local;
     saveLocalCache(blob);
   }
-
   async function pushToDrive(){
     if(!drive.signedIn || !drive.fileId || !blob) return;
     try{
       await driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+drive.fileId+"?uploadType=media", {
-        method:"PATCH",
-        headers:{ "Content-Type":"application/json" },
-        body: JSON.stringify(blob)
+        method:"PATCH", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(blob)
       });
       setSyncStatus("Synced just now via Google Drive");
     }catch(e){
@@ -325,36 +284,11 @@
     if(silent) return false;
     var redirectUri = window.location.origin + window.location.pathname;
     var params = new URLSearchParams({
-      client_id: drive.clientId,
-      redirect_uri: redirectUri,
-      response_type: "token",
-      scope: GDRIVE_SCOPE,
-      include_granted_scopes: "true",
-      prompt: "consent"
+      client_id: drive.clientId, redirect_uri: redirectUri, response_type: "token",
+      scope: GDRIVE_SCOPE, include_granted_scopes: "true", prompt: "consent"
     });
     window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
     return new Promise(function(){});
-  }
-
-  function saveStoredToken(token, expiresInSeconds){
-    try{
-      var expiresAt = Date.now() + (parseInt(expiresInSeconds||"3600",10) * 1000);
-      localStorage.setItem("gdrive_token", JSON.stringify({ token: token, expiresAt: expiresAt }));
-    }catch(e){}
-  }
-  function loadStoredToken(){
-    try{
-      var raw = localStorage.getItem("gdrive_token");
-      if(!raw) return null;
-      var obj = JSON.parse(raw);
-      if(obj && obj.token && obj.expiresAt && (obj.expiresAt - Date.now() > 60000)){
-        return obj.token;
-      }
-    }catch(e){}
-    return null;
-  }
-  function clearStoredToken(){
-    try{ localStorage.removeItem("gdrive_token"); }catch(e){}
   }
 
   function parseTokenFromHash(){
@@ -364,8 +298,7 @@
       var expiresIn = params.get("expires_in");
       history.replaceState(null, "", location.pathname + location.search);
       if(token){
-        drive.accessToken = token;
-        drive.signedIn = true;
+        drive.accessToken = token; drive.signedIn = true;
         saveStoredToken(token, expiresIn);
         return true;
       }
@@ -380,23 +313,11 @@
   async function initDriveSync(){
     var savedId = null;
     try{ savedId = localStorage.getItem("gdrive_client_id"); }catch(e){}
-    if(!savedId){
-      showSetupPanel();
-      setSyncStatus("Not connected to Drive");
-      return;
-    }
+    if(!savedId){ showSetupPanel(); setSyncStatus("Not connected to Drive"); return; }
     drive.clientId = savedId;
-    if(parseTokenFromHash()){
-      await finishDriveConnect();
-      return;
-    }
+    if(parseTokenFromHash()){ await finishDriveConnect(); return; }
     var stored = loadStoredToken();
-    if(stored){
-      drive.accessToken = stored;
-      drive.signedIn = true;
-      await finishDriveConnect();
-      return;
-    }
+    if(stored){ drive.accessToken = stored; drive.signedIn = true; await finishDriveConnect(); return; }
     function offerSignIn(){
       setSyncStatus("Not signed in", "Sign in with Google", function(){
         setSyncStatus("Opening Google sign-in…");
@@ -455,178 +376,118 @@
 
   async function loadAndRender(){
     state.data = await loadDay(state.date);
-    await ensureMasterHasAll(state.data);
     renderDateHeader();
-    renderSections();
+    renderMainTasks();
   }
 
-  function renderSections(){
-    var wrap = document.getElementById("sections");
+  function renderMainTasks(){
+    var wrap = document.getElementById("mainTasks");
     wrap.innerHTML = "";
-    state.data.categories.forEach(function(cat){
-      var sec = document.createElement("div");
-      sec.className = "section";
-      var head = document.createElement("div");
-      head.className = "section-head";
-      var nameInput = document.createElement("div");
-      nameInput.className = "section-name";
-      nameInput.contentEditable = "true";
-      nameInput.spellcheck = false;
-      nameInput.textContent = cat.name;
-      nameInput.addEventListener("blur", async function(){
-        var oldName = cat.name;
-        var newName = nameInput.textContent.trim() || oldName;
-        cat.name = newName;
-        nameInput.textContent = newName;
-        persist();
-        var master = await loadMasterCats();
-        var idx = master.indexOf(oldName);
-        if(idx>-1){ master[idx]=newName; await saveMasterCats(master); }
-      });
-      nameInput.addEventListener("keydown", function(e){
-        if(e.key === "Enter"){ e.preventDefault(); nameInput.blur(); }
-      });
-      var delBtn = document.createElement("button");
-      delBtn.className = "section-del"; delBtn.textContent = "✕"; delBtn.title = "Remove this section for good";
-      delBtn.addEventListener("click", async function(){
-        if(!confirm('Remove "'+cat.name+'"? It won\'t carry forward to future days.')) return;
-        state.data.categories = state.data.categories.filter(function(c){return c.id!==cat.id;});
-        persist(); renderSections();
-        var master = await loadMasterCats();
-        var idx = master.indexOf(cat.name);
-        if(idx>-1){ master.splice(idx,1); await saveMasterCats(master); }
-      });
-      head.appendChild(nameInput); head.appendChild(delBtn); sec.appendChild(head);
+    if(!state.data.tasks.length){
+      var hint = document.createElement("div"); hint.className = "empty-hint";
+      hint.textContent = "No tasks yet — type one below or tap the mic";
+      wrap.appendChild(hint);
+      return;
+    }
+    state.data.tasks.forEach(function(t){
+      if(!t.subtasks) t.subtasks = [];
+      var isTargeted = state.activeTarget === t.id;
+      var box = document.createElement("div");
+      box.className = "maintask" + (t.done? " done":"") + (isTargeted? " targeted":"");
 
-      var ul = document.createElement("ul"); ul.className = "tasks";
-      if(cat.tasks.length===0){
-        var hint = document.createElement("div"); hint.className = "empty-hint"; hint.textContent = "No tasks yet";
-        sec.appendChild(hint);
-      } else {
-        cat.tasks.forEach(function(t){
-          if(!t.subtasks) t.subtasks = [];
-          var isTargeted = state.activeTarget && state.activeTarget.catId===cat.id && state.activeTarget.taskId===t.id;
-          var li = document.createElement("li");
-          li.className = "task" + (t.done? " done":"") + (isTargeted? " targeted":"");
-          var bullet = document.createElement("div"); bullet.className = "bullet";
-          bullet.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
-          bullet.addEventListener("click", function(){ t.done = !t.done; persist(); renderSections(); });
+      var row = document.createElement("div"); row.className = "mt-row";
+      var bullet = document.createElement("div"); bullet.className = "bullet";
+      bullet.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
+      bullet.addEventListener("click", function(){ t.done = !t.done; persist(); renderMainTasks(); });
 
-          var txtWrap = document.createElement("div"); txtWrap.className = "task-text-wrap";
-          if(t.label){
-            var labelPill = document.createElement("span"); labelPill.className = "task-label"; labelPill.textContent = t.label;
-            labelPill.title = "Tap to edit label";
-            labelPill.addEventListener("click", function(){
-              var val = prompt("Label for this task (leave blank to remove):", t.label || "");
-              if(val === null) return;
-              t.label = val.trim();
-              persist(); renderSections();
-            });
-            txtWrap.appendChild(labelPill);
-          }
-          var txt = document.createElement("div"); txt.className = "task-text"; txt.contentEditable = "true"; txt.spellcheck = false; txt.textContent = t.text;
-          txt.addEventListener("blur", function(){
-            var v = txt.textContent.trim();
-            t.text = v || t.text;
-            txt.textContent = t.text;
-            persist();
-          });
-          txt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); txt.blur(); } });
-          txtWrap.appendChild(txt);
-
-          var labelBtn = document.createElement("button"); labelBtn.className = "task-label-toggle"; labelBtn.title = "Add label"; labelBtn.textContent = "🏷";
-          labelBtn.addEventListener("click", function(){
-            var val = prompt("Label for this task (leave blank to remove):", t.label || "");
-            if(val === null) return;
-            t.label = val.trim();
-            persist(); renderSections();
-          });
-          var subToggle = document.createElement("button"); subToggle.className = "task-sub-toggle"; subToggle.title = "Add sub-item"; subToggle.textContent = "+";
-          subToggle.addEventListener("click", function(){
-            state.activeTarget = isTargeted ? null : {catId:cat.id, taskId:t.id};
-            renderSections();
-          });
-          var del = document.createElement("button"); del.className = "task-del"; del.textContent = "✕";
-          del.addEventListener("click", function(){
-            cat.tasks = cat.tasks.filter(function(x){return x.id!==t.id;});
-            if(isTargeted) state.activeTarget = null;
-            persist(); renderSections();
-          });
-          li.appendChild(bullet); li.appendChild(txtWrap); li.appendChild(labelBtn); li.appendChild(subToggle); li.appendChild(del);
-          ul.appendChild(li);
-
-          if(t.subtasks.length){
-            var subUl = document.createElement("ul"); subUl.className = "subtasks";
-            t.subtasks.forEach(function(st){
-              var sli = document.createElement("li"); sli.className = "subtask" + (st.done? " done":"");
-              var sb = document.createElement("div"); sb.className = "sub-bullet";
-              sb.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
-              sb.addEventListener("click", function(){ st.done = !st.done; persist(); renderSections(); });
-              var stxt = document.createElement("div"); stxt.className = "subtask-text"; stxt.contentEditable = "true"; stxt.spellcheck = false; stxt.textContent = st.text;
-              stxt.addEventListener("blur", function(){
-                var v = stxt.textContent.trim();
-                st.text = v || st.text;
-                stxt.textContent = st.text;
-                persist();
-              });
-              stxt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); stxt.blur(); } });
-              var sdel = document.createElement("button"); sdel.className = "subtask-del"; sdel.textContent = "✕";
-              sdel.addEventListener("click", function(){
-                t.subtasks = t.subtasks.filter(function(x){return x.id!==st.id;});
-                persist(); renderSections();
-              });
-              sli.appendChild(sb); sli.appendChild(stxt); sli.appendChild(sdel);
-              subUl.appendChild(sli);
-            });
-            ul.appendChild(subUl);
-          }
-
-          if(isTargeted){
-            var addRow = document.createElement("div"); addRow.className = "subtask-add-row";
-            var addInput = document.createElement("input");
-            addInput.placeholder = "Type a sub-item, or speak it"; addInput.autofocus = true;
-            addInput.addEventListener("keydown", function(e){
-              if(e.key==="Enter"){ var v = e.target.value.trim(); if(v){ addSubtask(cat, t, v); e.target.value=""; } }
-            });
-            var hintEl = document.createElement("span"); hintEl.className = "hint"; hintEl.textContent = "mic adds here";
-            addRow.appendChild(addInput); addRow.appendChild(hintEl);
-            sec.appendChild(addRow);
-          }
+      var txtWrap = document.createElement("div"); txtWrap.className = "mt-text-wrap";
+      if(t.label){
+        var pill = document.createElement("span"); pill.className = "mt-label"; pill.textContent = t.label; pill.title = "Tap to edit label";
+        pill.addEventListener("click", function(){
+          var val = prompt("Label for this task (leave blank to remove):", t.label || "");
+          if(val === null) return;
+          t.label = val.trim(); persist(); renderMainTasks();
         });
-        sec.appendChild(ul);
+        txtWrap.appendChild(pill);
       }
-      wrap.appendChild(sec);
+      var txt = document.createElement("div"); txt.className = "mt-text"; txt.contentEditable = "true"; txt.spellcheck = false; txt.textContent = t.text;
+      txt.addEventListener("blur", function(){
+        var v = txt.textContent.trim(); t.text = v || t.text; txt.textContent = t.text; persist();
+      });
+      txt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); txt.blur(); } });
+      txtWrap.appendChild(txt);
+
+      var labelBtn = document.createElement("button"); labelBtn.className = "mt-label-toggle"; labelBtn.title = "Add label"; labelBtn.textContent = "🏷";
+      labelBtn.addEventListener("click", function(){
+        var val = prompt("Label for this task (leave blank to remove):", t.label || "");
+        if(val === null) return;
+        t.label = val.trim(); persist(); renderMainTasks();
+      });
+      var subToggle = document.createElement("button"); subToggle.className = "mt-sub-toggle"; subToggle.title = "Add tiny task"; subToggle.textContent = "+";
+      subToggle.addEventListener("click", function(){
+        state.activeTarget = isTargeted ? null : t.id;
+        renderMainTasks();
+      });
+      var del = document.createElement("button"); del.className = "mt-del"; del.textContent = "✕";
+      del.addEventListener("click", function(){
+        state.data.tasks = state.data.tasks.filter(function(x){return x.id!==t.id;});
+        if(isTargeted) state.activeTarget = null;
+        persist(); renderMainTasks();
+      });
+      row.appendChild(bullet); row.appendChild(txtWrap); row.appendChild(labelBtn); row.appendChild(subToggle); row.appendChild(del);
+      box.appendChild(row);
+
+      if(t.subtasks.length){
+        var ul = document.createElement("ul"); ul.className = "tinytasks";
+        t.subtasks.forEach(function(st){
+          var li = document.createElement("li"); li.className = "tinytask" + (st.done? " done":"");
+          var sb = document.createElement("div"); sb.className = "tt-bullet";
+          sb.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
+          sb.addEventListener("click", function(){ st.done = !st.done; persist(); renderMainTasks(); });
+          var stxt = document.createElement("div"); stxt.className = "tt-text"; stxt.contentEditable = "true"; stxt.spellcheck = false; stxt.textContent = st.text;
+          stxt.addEventListener("blur", function(){ var v = stxt.textContent.trim(); st.text = v || st.text; stxt.textContent = st.text; persist(); });
+          stxt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); stxt.blur(); } });
+          var sdel = document.createElement("button"); sdel.className = "tt-del"; sdel.textContent = "✕";
+          sdel.addEventListener("click", function(){
+            t.subtasks = t.subtasks.filter(function(x){return x.id!==st.id;});
+            persist(); renderMainTasks();
+          });
+          li.appendChild(sb); li.appendChild(stxt); li.appendChild(sdel);
+          ul.appendChild(li);
+        });
+        box.appendChild(ul);
+      }
+
+      if(isTargeted){
+        var addRow = document.createElement("div"); addRow.className = "tt-add-row";
+        var addInput = document.createElement("input");
+        addInput.placeholder = "Type a tiny task, or speak it"; addInput.autofocus = true;
+        addInput.addEventListener("keydown", function(e){
+          if(e.key==="Enter"){ var v = e.target.value.trim(); if(v){ addTinyTask(t, v); e.target.value=""; } }
+        });
+        var hintEl = document.createElement("span"); hintEl.className = "hint"; hintEl.textContent = "mic adds here";
+        addRow.appendChild(addInput); addRow.appendChild(hintEl);
+        box.appendChild(addRow);
+      }
+
+      wrap.appendChild(box);
     });
   }
 
   async function persist(){ await saveDay(state.date, state.data); }
 
-  function addSubtask(cat, task, text){
+  function addTinyTask(mainTask, text){
     if(!text || !text.trim()) return;
-    if(!task.subtasks) task.subtasks = [];
-    task.subtasks.push({id:uid(), text:text.trim(), done:false});
-    persist(); renderSections();
-    showToast('Added sub-item to "'+task.text+'"');
+    if(!mainTask.subtasks) mainTask.subtasks = [];
+    mainTask.subtasks.push({id:uid(), text:text.trim(), done:false});
+    persist(); renderMainTasks();
+    showToast('Added to "'+mainTask.text+'"');
   }
-
-  function findCategoryByFuzzyName(spoken){
-    var lower = spoken.toLowerCase(); var best = null;
-    state.data.categories.forEach(function(c){ if(lower.indexOf(c.name.toLowerCase()) !== -1){ best = c; } });
-    return best;
-  }
-
-  async function addTaskToCategory(catName, text){
+  function addMainTask(text){
     if(!text || !text.trim()) return;
-    var cat = state.data.categories.find(function(c){return c.name===catName;});
-    if(!cat){
-      cat = {id:uid(), name:catName, tasks:[]};
-      state.data.categories.push(cat);
-      var master = await loadMasterCats();
-      if(master.indexOf(catName)===-1){ master.push(catName); await saveMasterCats(master); }
-    }
-    cat.tasks.push({id:uid(), text:text.trim(), done:false});
-    persist(); renderSections();
-    showToast('Added to "'+catName+'"');
+    state.data.tasks.push({id:uid(), text:text.trim(), done:false, label:"", subtasks:[]});
+    persist(); renderMainTasks();
+    showToast('Main task added');
   }
 
   function showToast(msg){
@@ -636,61 +497,20 @@
     showToast._tm = setTimeout(function(){ t.classList.remove("show"); }, 1800);
   }
 
-  function openCategoryPicker(heardText, fallbackText){
-    var picker = document.getElementById("catPicker");
-    var heard = document.getElementById("catPickerHeard");
-    var list = document.getElementById("catPickerList");
-    heard.textContent = 'Add to which section? — "'+fallbackText+'"';
-    list.innerHTML = "";
-    state.data.categories.forEach(function(c){
-      var b = document.createElement("button"); b.textContent = c.name;
-      b.addEventListener("click", function(){ addTaskToCategory(c.name, fallbackText); picker.classList.remove("open"); });
-      list.appendChild(b);
-    });
-    var newBtn = document.createElement("button"); newBtn.className = "new"; newBtn.textContent = "+ New section";
-    newBtn.addEventListener("click", function(){
-      picker.classList.remove("open");
-      var name = prompt("Section name:");
-      if(name && name.trim()){ addTaskToCategory(name.trim(), fallbackText); }
-    });
-    list.appendChild(newBtn);
-    picker.classList.add("open");
-    document.getElementById("catPickerCancel").onclick = function(){ picker.classList.remove("open"); };
-  }
-
   function handleParsedSpeech(raw){
     var text = raw.trim();
     if(!text) return;
     if(state.activeTarget){
-      var tCat = state.data.categories.find(function(c){return c.id===state.activeTarget.catId;});
-      var tTask = tCat && tCat.tasks.find(function(x){return x.id===state.activeTarget.taskId;});
-      if(tCat && tTask){ addSubtask(tCat, tTask, text); return; }
+      var target = state.data.tasks.find(function(x){return x.id===state.activeTarget;});
+      if(target){ addTinyTask(target, text); return; }
       state.activeTarget = null;
     }
-    var matched = findCategoryByFuzzyName(text);
-    if(matched){
-      var stripped = text.replace(new RegExp(matched.name, "i"), "").replace(/^[\s,:\-]+/, "").trim();
-      if(!stripped) stripped = text;
-      addTaskToCategory(matched.name, stripped);
-    } else {
-      if(state.data.categories.length === 1){ addTaskToCategory(state.data.categories[0].name, text); }
-      else { openCategoryPicker(text, text); }
-    }
+    addMainTask(text);
   }
 
   document.getElementById("prevDay").addEventListener("click", function(){ shiftDay(-1); });
   document.getElementById("nextDay").addEventListener("click", function(){ shiftDay(1); });
   document.getElementById("todayBtn").addEventListener("click", function(){ state.date = todayStr(); loadAndRender(); });
-  document.getElementById("addCatBtn").addEventListener("click", async function(){
-    var inp = document.getElementById("newCatInput");
-    var name = inp.value.trim();
-    if(!name) return;
-    state.data.categories.push({id:uid(), name:name, tasks:[]});
-    var master = await loadMasterCats();
-    if(master.indexOf(name)===-1){ master.push(name); await saveMasterCats(master); }
-    inp.value = ""; persist(); renderSections();
-  });
-  document.getElementById("newCatInput").addEventListener("keydown", function(e){ if(e.key==="Enter"){ document.getElementById("addCatBtn").click(); } });
   document.getElementById("textAdd").addEventListener("keydown", function(e){
     if(e.key==="Enter"){ var val = e.target.value; e.target.value = ""; handleParsedSpeech(val); }
   });
