@@ -166,9 +166,32 @@
     pushTimer = setTimeout(pushToDrive, 1000);
   }
 
+  function normalizeDayData(parsed){
+    if(!parsed) return null;
+    if(Array.isArray(parsed.tasks)) return parsed;
+    if(Array.isArray(parsed.categories)){
+      var migrated = [];
+      parsed.categories.forEach(function(cat){
+        (cat.tasks||[]).forEach(function(t){
+          migrated.push({
+            id: t.id || uid(),
+            text: t.text,
+            done: !!t.done,
+            label: t.label || "",
+            subtasks: (t.subtasks||[]).map(function(st){ return {id: st.id || uid(), text: st.text, done: !!st.done}; })
+          });
+        });
+      });
+      return { tasks: migrated };
+    }
+    return { tasks: [] };
+  }
+
   async function loadDay(dateStr){
     var raw = await storageGet("diary:"+dateStr);
-    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+    if(raw){
+      try{ return normalizeDayData(JSON.parse(raw)); }catch(e){}
+    }
     var prior = await findMostRecentPriorDay(dateStr, 30);
     var tasks = [];
     if(prior && prior.tasks){
@@ -191,7 +214,7 @@
       prev.setDate(prev.getDate()-i);
       var prevStr = prev.getFullYear()+"-"+pad(prev.getMonth()+1)+"-"+pad(prev.getDate());
       var raw = await storageGet("diary:"+prevStr);
-      if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+      if(raw){ try{ return normalizeDayData(JSON.parse(raw)); }catch(e){} }
     }
     return null;
   }
@@ -542,9 +565,17 @@
   }
 
   (async function boot(){
-    blob = loadLocalCache();
-    await loadAndRender();
-    setTimeout(initDriveSync, 300);
+    try{
+      blob = loadLocalCache();
+      await loadAndRender();
+      setTimeout(initDriveSync, 300);
+    }catch(e){
+      document.getElementById("syncStatus").textContent = "Something went wrong loading today — try reloading";
+      var hint = document.createElement("div");
+      hint.style.cssText = "font-size:11px;color:var(--ink-soft);margin:4px 2px;";
+      hint.textContent = String(e && e.message || e);
+      document.getElementById("mainTasks").before(hint);
+    }
   })();
 })();
 </script>
