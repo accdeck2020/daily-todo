@@ -45,6 +45,9 @@
   .setup input{ width:100%; font-size:14px; padding:9px 10px; border:1.5px solid var(--border); border-radius:8px; margin-bottom:8px; background:#fff; color:var(--ink); }
   .setup button{ background:var(--pen); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-size:13px; cursor:pointer; }
 
+  .filterrow{ display:flex; align-items:center; gap:8px; margin:0 2px 14px 0; font-size:12.5px; color:var(--ink-soft); }
+  .filterrow select{ font-size:12.5px; border:1.5px solid var(--border); background:var(--card); color:var(--ink); border-radius:8px; padding:4px 6px; }
+
   .maintask{ margin:18px 0; }
   .mt-row{ display:flex; align-items:flex-start; gap:9px; }
   .bullet{ flex:0 0 auto; width:22px; height:22px; margin-top:2px; border-radius:50%; border:2.5px solid var(--pen);
@@ -53,13 +56,21 @@
   .bullet svg{width:13px; height:13px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
   .maintask.done .bullet svg{opacity:1;}
   .mt-text-wrap{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .mt-label{ align-self:flex-start; font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--pen); color:var(--pen-dark);
+  .mt-badges{ display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
+  .mt-label{ font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--pen); color:var(--pen-dark);
+    border-radius:10px; padding:1px 8px; cursor:pointer; }
+  .mt-label.empty{ border-style:dashed; color:var(--ink-soft); border-color:var(--border); }
+  .mt-priority{ font-size:11px; font-weight:700; font-family:'Inter',sans-serif; background:var(--pen); color:#fff;
+    border-radius:10px; padding:1px 7px; cursor:pointer; }
+  .mt-reminder{ font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--ink-soft); color:var(--ink-soft);
     border-radius:10px; padding:1px 8px; cursor:pointer; }
   .mt-text{ font-family:'Kalam',cursive; font-size:20px; font-weight:700; color:var(--pen-dark); outline:none;
     white-space:normal; word-break:break-word; line-height:1.3; border-bottom:2px solid transparent; }
   .mt-text:focus{ border-bottom:2px solid var(--pen); }
   .maintask.done .mt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
-  .mt-label-toggle{ flex:0 0 auto; background:none; border:none; font-size:15px; cursor:pointer; padding:4px 3px; opacity:0.55; }
+  .mt-label-toggle,.mt-prio-toggle,.mt-remind-toggle,.mt-date-toggle,.mt-history-toggle{ flex:0 0 auto; background:none; border:none; font-size:15px; cursor:pointer; padding:4px 3px; opacity:0.55; }
+  .mt-history-toggle{ position:relative; }
+  .mt-history-toggle .count{ position:absolute; top:-2px; right:-2px; background:var(--pen); color:#fff; font-size:9px; border-radius:8px; padding:0 3px; line-height:1.3; }
   .mt-sub-toggle{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:17px; cursor:pointer; padding:4px 3px; opacity:0.7; }
   .mt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:4px 3px; opacity:0.5; }
   .maintask.targeted .mt-row{ background:var(--card); border-radius:8px; box-shadow:inset 0 0 0 1.5px var(--pen); }
@@ -73,6 +84,9 @@
   li.tinytask.done .tt-bullet svg{opacity:1;}
   .tt-text{ flex:1; font-size:15px; line-height:1.4; padding-top:1px; color:var(--ink); outline:none; }
   li.tinytask.done .tt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
+  .tt-priority{ flex:0 0 auto; font-size:10px; font-weight:700; font-family:'Inter',sans-serif; background:var(--pen); color:#fff;
+    border-radius:9px; padding:0px 6px; cursor:pointer; align-self:center; }
+  .tt-prio-toggle{ flex:0 0 auto; background:none; border:none; font-size:12px; cursor:pointer; padding:0 2px; opacity:0.5; }
   .tt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer; padding:0 3px; opacity:0.5; }
 
   .tt-add-row{ display:flex; align-items:center; gap:8px; margin:2px 0 8px 27px; padding-left:12px; border-left:2px solid var(--pen); }
@@ -119,6 +133,11 @@
     <button id="saveClientIdBtn">Save and continue</button>
   </div>
 
+  <div class="filterrow" id="filterRow" style="display:none;">
+    <span>Filter:</span>
+    <select id="labelFilterSelect"><option value="">All tasks</option></select>
+  </div>
+
   <div id="mainTasks"></div>
 </div>
 
@@ -134,7 +153,9 @@
 (function(){
   var GDRIVE_FILE_NAME = "diary-todo-sync.json";
   var GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-  var state = { date: todayStr(), data: null, activeTarget: null };
+  var state = { date: todayStr(), data: null, activeTarget: null, filterLabel: "" };
+  var knownLabels = [];
+  var reminderTimers = {};
   var drive = { clientId:null, accessToken:null, fileId:null, signedIn:false };
   var blob = null;
   var pushTimer = null;
@@ -178,7 +199,10 @@
             text: t.text,
             done: !!t.done,
             label: t.label || "",
-            subtasks: (t.subtasks||[]).map(function(st){ return {id: st.id || uid(), text: st.text, done: !!st.done}; })
+            priority: (typeof t.priority === "number") ? t.priority : null,
+            reminderTime: null,
+            moveHistory: t.moveHistory || [],
+            subtasks: (t.subtasks||[]).map(function(st){ return {id: st.id || uid(), text: st.text, done: !!st.done, priority: (typeof st.priority === "number") ? st.priority : null}; })
           });
         });
       });
@@ -199,7 +223,10 @@
         if(!t.done){
           tasks.push({
             id: uid(), text: t.text, done:false, label: t.label || "",
-            subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done}; })
+            priority: (typeof t.priority === "number") ? t.priority : null,
+            reminderTime: null,
+            moveHistory: t.moveHistory || [],
+            subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done, priority: (typeof st.priority === "number") ? st.priority : null}; })
           });
         }
       });
@@ -207,6 +234,32 @@
     return { tasks: tasks };
   }
   async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
+  async function loadKnownLabels(){
+    var raw = await storageGet("labels:list");
+    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+    return [];
+  }
+  async function saveKnownLabels(list){ await storageSet("labels:list", JSON.stringify(list)); }
+  async function registerLabel(name){
+    if(!name) return;
+    if(knownLabels.indexOf(name) === -1){
+      knownLabels.push(name);
+      await saveKnownLabels(knownLabels);
+      populateFilterOptions();
+    }
+  }
+  function populateFilterOptions(){
+    var sel = document.getElementById("labelFilterSelect");
+    var current = sel.value;
+    sel.innerHTML = '<option value="">All tasks</option>';
+    knownLabels.forEach(function(l){
+      var o = document.createElement("option"); o.value = l; o.textContent = l;
+      sel.appendChild(o);
+    });
+    if(knownLabels.indexOf(current) !== -1 || current === "") sel.value = current;
+    else { sel.value = ""; state.filterLabel = ""; }
+    document.getElementById("filterRow").style.display = knownLabels.length ? "flex" : "none";
+  }
   async function findMostRecentPriorDay(dateStr, maxLookback){
     var d = parseDate(dateStr);
     for(var i=1; i<=maxLookback; i++){
@@ -403,16 +456,104 @@
     renderMainTasks();
   }
 
+  function pickLabel(currentLabel, onPicked){
+    var options = knownLabels.slice();
+    var choice = prompt(
+      "Label for this task (leave blank to remove).\nExisting: " + (options.length ? options.join(", ") : "(none yet)"),
+      currentLabel || ""
+    );
+    if(choice === null) return;
+    onPicked(choice.trim());
+  }
+  function pickPriority(current, onPicked){
+    var val = prompt("Priority number (1 = highest, blank to remove):", current != null ? String(current) : "");
+    if(val === null) return;
+    val = val.trim();
+    if(val === ""){ onPicked(null); return; }
+    var n = parseInt(val, 10);
+    if(!isNaN(n)) onPicked(n);
+  }
+  function pickReminder(current, onPicked){
+    var val = prompt("Reminder time today, 24hr HH:MM (e.g. 15:30). Blank to remove:", current || "");
+    if(val === null) return;
+    val = val.trim();
+    if(val === ""){ onPicked(null); return; }
+    if(/^([01]\d|2[0-3]):([0-5]\d)$/.test(val)) onPicked(val);
+    else showToast("Use 24hr HH:MM, e.g. 09:05 or 15:30");
+  }
+
+  function openDatePicker(currentDateStr, onPicked){
+    var input = document.createElement("input");
+    input.type = "date";
+    input.value = currentDateStr;
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.appendChild(input);
+    var done = false;
+    function cleanup(){ if(input.parentNode) input.parentNode.removeChild(input); }
+    input.addEventListener("change", function(){
+      done = true;
+      onPicked(input.value);
+      cleanup();
+    });
+    input.addEventListener("blur", function(){
+      setTimeout(function(){ if(!done) cleanup(); }, 300);
+    });
+    if(input.showPicker){ try{ input.showPicker(); }catch(e){ input.click(); } }
+    else { input.click(); }
+  }
+
+  async function moveMainTaskToDate(task, fromDateStr, toDateStr){
+    if(!task.moveHistory) task.moveHistory = [];
+    task.moveHistory.push({ from: fromDateStr, to: toDateStr, at: Date.now() });
+
+    state.data.tasks = state.data.tasks.filter(function(x){ return x.id !== task.id; });
+    await persist();
+
+    var targetData = await loadDay(toDateStr);
+    targetData.tasks.push(task);
+    await saveDay(toDateStr, targetData);
+
+    if(state.activeTarget === task.id) state.activeTarget = null;
+    renderMainTasks();
+    showToast('Moved "'+task.text+'" to '+formatDateForToast(toDateStr));
+  }
+
+  function formatDateForToast(dateStr){
+    var d = parseDate(dateStr);
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
+  }
+
+  function showMoveHistory(task){
+    var lines = task.moveHistory.map(function(m){
+      var when = new Date(m.at);
+      var whenStr = when.toLocaleDateString() + " " + when.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+      return formatDateForToast(m.from) + "  →  " + formatDateForToast(m.to) + "   (moved " + whenStr + ")";
+    });
+    alert('Move history for "'+task.text+'":\n\n' + lines.join("\n"));
+  }
+
   function renderMainTasks(){
     var wrap = document.getElementById("mainTasks");
     wrap.innerHTML = "";
-    if(!state.data.tasks.length){
+    var visible = state.data.tasks.filter(function(t){
+      return !state.filterLabel || t.label === state.filterLabel;
+    });
+    if(!visible.length){
       var hint = document.createElement("div"); hint.className = "empty-hint";
-      hint.textContent = "No tasks yet — type one below or tap the mic";
+      hint.textContent = state.data.tasks.length ? "No tasks with this label" : "No tasks yet — type one below or tap the mic";
       wrap.appendChild(hint);
+      clearAllReminderTimers();
+      scheduleAllReminders();
       return;
     }
-    state.data.tasks.forEach(function(t){
+    var sorted = visible.slice().sort(function(a,b){
+      var ap = (a.priority==null) ? Infinity : a.priority;
+      var bp = (b.priority==null) ? Infinity : b.priority;
+      return ap - bp;
+    });
+    sorted.forEach(function(t){
       if(!t.subtasks) t.subtasks = [];
       var isTargeted = state.activeTarget === t.id;
       var box = document.createElement("div");
@@ -424,15 +565,26 @@
       bullet.addEventListener("click", function(){ t.done = !t.done; persist(); renderMainTasks(); });
 
       var txtWrap = document.createElement("div"); txtWrap.className = "mt-text-wrap";
+      var badges = document.createElement("div"); badges.className = "mt-badges";
+      if(t.priority != null){
+        var pbadge = document.createElement("span"); pbadge.className = "mt-priority"; pbadge.textContent = "P"+t.priority; pbadge.title = "Tap to change priority";
+        pbadge.addEventListener("click", function(){ pickPriority(t.priority, function(v){ t.priority=v; persist(); renderMainTasks(); }); });
+        badges.appendChild(pbadge);
+      }
       if(t.label){
         var pill = document.createElement("span"); pill.className = "mt-label"; pill.textContent = t.label; pill.title = "Tap to edit label";
         pill.addEventListener("click", function(){
-          var val = prompt("Label for this task (leave blank to remove):", t.label || "");
-          if(val === null) return;
-          t.label = val.trim(); persist(); renderMainTasks();
+          pickLabel(t.label, async function(v){ t.label = v; await registerLabel(v); persist(); renderMainTasks(); });
         });
-        txtWrap.appendChild(pill);
+        badges.appendChild(pill);
       }
+      if(t.reminderTime){
+        var rbadge = document.createElement("span"); rbadge.className = "mt-reminder"; rbadge.textContent = "⏰ "+t.reminderTime; rbadge.title = "Tap to change reminder";
+        rbadge.addEventListener("click", function(){ pickReminder(t.reminderTime, function(v){ t.reminderTime=v; persist(); renderMainTasks(); }); });
+        badges.appendChild(rbadge);
+      }
+      if(badges.childNodes.length) txtWrap.appendChild(badges);
+
       var txt = document.createElement("div"); txt.className = "mt-text"; txt.contentEditable = "true"; txt.spellcheck = false; txt.textContent = t.text;
       txt.addEventListener("blur", function(){
         var v = txt.textContent.trim(); t.text = v || t.text; txt.textContent = t.text; persist();
@@ -440,12 +592,28 @@
       txt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); txt.blur(); } });
       txtWrap.appendChild(txt);
 
+      var prioBtn = document.createElement("button"); prioBtn.className = "mt-prio-toggle"; prioBtn.title = "Set priority"; prioBtn.textContent = "🔢";
+      prioBtn.addEventListener("click", function(){ pickPriority(t.priority, function(v){ t.priority=v; persist(); renderMainTasks(); }); });
       var labelBtn = document.createElement("button"); labelBtn.className = "mt-label-toggle"; labelBtn.title = "Add label"; labelBtn.textContent = "🏷";
       labelBtn.addEventListener("click", function(){
-        var val = prompt("Label for this task (leave blank to remove):", t.label || "");
-        if(val === null) return;
-        t.label = val.trim(); persist(); renderMainTasks();
+        pickLabel(t.label, async function(v){ t.label = v; await registerLabel(v); persist(); renderMainTasks(); });
       });
+      var remindBtn = document.createElement("button"); remindBtn.className = "mt-remind-toggle"; remindBtn.title = "Set reminder"; remindBtn.textContent = "⏰";
+      remindBtn.addEventListener("click", function(){ pickReminder(t.reminderTime, function(v){ t.reminderTime=v; persist(); renderMainTasks(); }); });
+      var dateBtn = document.createElement("button"); dateBtn.className = "mt-date-toggle"; dateBtn.title = "Move to another date"; dateBtn.textContent = "📅";
+      dateBtn.addEventListener("click", function(){
+        openDatePicker(state.date, function(newDateStr){
+          if(newDateStr && newDateStr !== state.date){ moveMainTaskToDate(t, state.date, newDateStr); }
+        });
+      });
+      var historyBtn = null;
+      if(t.moveHistory && t.moveHistory.length){
+        historyBtn = document.createElement("button"); historyBtn.className = "mt-history-toggle"; historyBtn.title = "View move history";
+        historyBtn.textContent = "🕘";
+        var countSpan = document.createElement("span"); countSpan.className = "count"; countSpan.textContent = t.moveHistory.length;
+        historyBtn.appendChild(countSpan);
+        historyBtn.addEventListener("click", function(){ showMoveHistory(t); });
+      }
       var subToggle = document.createElement("button"); subToggle.className = "mt-sub-toggle"; subToggle.title = "Add tiny task"; subToggle.textContent = "+";
       subToggle.addEventListener("click", function(){
         state.activeTarget = isTargeted ? null : t.id;
@@ -457,25 +625,39 @@
         if(isTargeted) state.activeTarget = null;
         persist(); renderMainTasks();
       });
-      row.appendChild(bullet); row.appendChild(txtWrap); row.appendChild(labelBtn); row.appendChild(subToggle); row.appendChild(del);
+      row.appendChild(bullet); row.appendChild(txtWrap); row.appendChild(prioBtn); row.appendChild(labelBtn); row.appendChild(remindBtn); row.appendChild(dateBtn);
+      if(historyBtn) row.appendChild(historyBtn);
+      row.appendChild(subToggle); row.appendChild(del);
       box.appendChild(row);
 
       if(t.subtasks.length){
+        var sortedSub = t.subtasks.slice().sort(function(a,b){
+          var ap = (a.priority==null) ? Infinity : a.priority;
+          var bp = (b.priority==null) ? Infinity : b.priority;
+          return ap - bp;
+        });
         var ul = document.createElement("ul"); ul.className = "tinytasks";
-        t.subtasks.forEach(function(st){
+        sortedSub.forEach(function(st){
           var li = document.createElement("li"); li.className = "tinytask" + (st.done? " done":"");
           var sb = document.createElement("div"); sb.className = "tt-bullet";
           sb.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
           sb.addEventListener("click", function(){ st.done = !st.done; persist(); renderMainTasks(); });
+          if(st.priority != null){
+            var stp = document.createElement("span"); stp.className = "tt-priority"; stp.textContent = "P"+st.priority; stp.title = "Tap to change priority";
+            stp.addEventListener("click", function(){ pickPriority(st.priority, function(v){ st.priority=v; persist(); renderMainTasks(); }); });
+            li.appendChild(stp);
+          }
           var stxt = document.createElement("div"); stxt.className = "tt-text"; stxt.contentEditable = "true"; stxt.spellcheck = false; stxt.textContent = st.text;
           stxt.addEventListener("blur", function(){ var v = stxt.textContent.trim(); st.text = v || st.text; stxt.textContent = st.text; persist(); });
           stxt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); stxt.blur(); } });
+          var stPrioBtn = document.createElement("button"); stPrioBtn.className = "tt-prio-toggle"; stPrioBtn.title = "Set priority"; stPrioBtn.textContent = "🔢";
+          stPrioBtn.addEventListener("click", function(){ pickPriority(st.priority, function(v){ st.priority=v; persist(); renderMainTasks(); }); });
           var sdel = document.createElement("button"); sdel.className = "tt-del"; sdel.textContent = "✕";
           sdel.addEventListener("click", function(){
             t.subtasks = t.subtasks.filter(function(x){return x.id!==st.id;});
             persist(); renderMainTasks();
           });
-          li.appendChild(sb); li.appendChild(stxt); li.appendChild(sdel);
+          li.appendChild(sb); li.appendChild(stxt); li.appendChild(stPrioBtn); li.appendChild(sdel);
           ul.appendChild(li);
         });
         box.appendChild(ul);
@@ -495,6 +677,41 @@
 
       wrap.appendChild(box);
     });
+    clearAllReminderTimers();
+    scheduleAllReminders();
+  }
+
+  function clearAllReminderTimers(){
+    Object.keys(reminderTimers).forEach(function(id){ clearTimeout(reminderTimers[id]); });
+    reminderTimers = {};
+  }
+  function scheduleAllReminders(){
+    if(state.date !== todayStr()) return;
+    if(!state.data || !state.data.tasks) return;
+    state.data.tasks.forEach(function(t){
+      if(t.done || !t.reminderTime) return;
+      var parts = t.reminderTime.split(":");
+      var target = new Date();
+      target.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
+      var ms = target.getTime() - Date.now();
+      if(ms <= 0) return;
+      reminderTimers[t.id] = setTimeout(function(){ fireReminder(t); }, ms);
+    });
+  }
+  function fireReminder(task){
+    showToast("⏰ Reminder: " + task.text);
+    try{
+      if("Notification" in window){
+        if(Notification.permission === "granted"){
+          new Notification("Task reminder", { body: task.text });
+        } else if(Notification.permission !== "denied"){
+          Notification.requestPermission().then(function(perm){
+            if(perm === "granted") new Notification("Task reminder", { body: task.text });
+          });
+        }
+      }
+    }catch(e){}
+    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
   }
 
   async function persist(){ await saveDay(state.date, state.data); }
@@ -502,14 +719,15 @@
   function addTinyTask(mainTask, text){
     if(!text || !text.trim()) return;
     if(!mainTask.subtasks) mainTask.subtasks = [];
-    mainTask.subtasks.push({id:uid(), text:text.trim(), done:false});
+    mainTask.subtasks.push({id:uid(), text:text.trim(), done:false, priority:null});
     persist(); renderMainTasks();
     showToast('Added to "'+mainTask.text+'"');
   }
   function addMainTask(text){
     if(!text || !text.trim()) return;
-    state.data.tasks.push({id:uid(), text:text.trim(), done:false, label:"", subtasks:[]});
+    state.data.tasks.push({id:uid(), text:text.trim(), done:false, label:"", priority:null, reminderTime:null, moveHistory:[], subtasks:[]});
     persist(); renderMainTasks();
+    scheduleAllReminders();
     showToast('Main task added');
   }
 
@@ -534,6 +752,9 @@
   document.getElementById("prevDay").addEventListener("click", function(){ shiftDay(-1); });
   document.getElementById("nextDay").addEventListener("click", function(){ shiftDay(1); });
   document.getElementById("todayBtn").addEventListener("click", function(){ state.date = todayStr(); loadAndRender(); });
+  document.getElementById("labelFilterSelect").addEventListener("change", function(e){
+    state.filterLabel = e.target.value; renderMainTasks();
+  });
   document.getElementById("textAdd").addEventListener("keydown", function(e){
     if(e.key==="Enter"){ var val = e.target.value; e.target.value = ""; handleParsedSpeech(val); }
   });
@@ -567,6 +788,8 @@
   (async function boot(){
     try{
       blob = loadLocalCache();
+      knownLabels = await loadKnownLabels();
+      populateFilterOptions();
       await loadAndRender();
       setTimeout(initDriveSync, 300);
     }catch(e){
