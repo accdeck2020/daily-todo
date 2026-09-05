@@ -159,6 +159,12 @@
   var drive = { clientId:null, accessToken:null, fileId:null, signedIn:false };
   var blob = null;
   var pushTimer = null;
+  var dirty = false;
+  var driveOpQueue = Promise.resolve();
+  function queueDriveOp(fn){
+    driveOpQueue = driveOpQueue.then(fn, fn);
+    return driveOpQueue;
+  }
 
   function todayStr(){ var d = new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
   function pad(n){ return n<10 ? "0"+n : ""+n; }
@@ -178,18 +184,19 @@
     if(!blob) blob = loadLocalCache();
     blob.kv[key] = value;
     blob.updatedAt = Date.now();
+    dirty = true;
     saveLocalCache(blob);
     schedulePush();
   }
   function schedulePush(){
     if(!drive.signedIn) return;
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(pushToDrive, 350);
+    pushTimer = setTimeout(function(){ queueDriveOp(pushToDrive); }, 350);
   }
   function flushPushNow(){
     if(!drive.signedIn) return;
     clearTimeout(pushTimer);
-    pushToDrive();
+    queueDriveOp(pushToDrive);
   }
 
   function normalizeDayData(parsed){
@@ -343,6 +350,12 @@
   }
 
   async function pullFromDrive(){
+    if(dirty){
+      // A local change hasn't been pushed yet — never let an incoming pull clobber it.
+      // Push what we have instead of pulling over it.
+      await pushToDrive();
+      return;
+    }
     var res = await driveFetch("https://www.googleapis.com/drive/v3/files/"+drive.fileId+"?alt=media");
     var remote = await res.json();
     var local = blob || loadLocalCache();
@@ -351,10 +364,12 @@
   }
   async function pushToDrive(){
     if(!drive.signedIn || !drive.fileId || !blob) return;
+    var wasDirty = dirty;
     try{
       await driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+drive.fileId+"?uploadType=media", {
         method:"PATCH", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(blob)
       });
+      if(wasDirty) dirty = false;
       setSyncStatus("Synced just now via Google Drive");
     }catch(e){
       setSyncStatus("Couldn't reach Drive — saved on this device");
@@ -413,10 +428,10 @@
     setSyncStatus("Syncing…");
     try{
       drive.fileId = await findOrCreateDriveFile();
-      await pullFromDrive();
+      await queueDriveOp(pullFromDrive);
       setSyncStatus("Synced via Google Drive", "Refresh", async function(){
         setSyncStatus("Refreshing…");
-        await pullFromDrive();
+        await queueDriveOp(pullFromDrive);
         await loadAndRender();
         setSyncStatus("Synced via Google Drive");
       });
@@ -435,7 +450,7 @@
 
   document.addEventListener("visibilitychange", function(){
     if(document.visibilityState === "visible" && drive.signedIn && drive.fileId){
-      pullFromDrive().then(loadAndRender);
+      queueDriveOp(pullFromDrive).then(loadAndRender);
     } else if(document.visibilityState === "hidden"){
       flushPushNow();
     }
