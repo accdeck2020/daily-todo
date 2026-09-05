@@ -313,6 +313,8 @@
   }
   function clearStoredToken(){ try{ localStorage.removeItem("gdrive_token"); }catch(e){} }
 
+  var authExpiredHandled = false;
+
   async function driveFetch(url, opts){
     opts = opts || {};
     opts.headers = opts.headers || {};
@@ -321,6 +323,7 @@
     if(res.status === 401){
       clearStoredToken();
       drive.signedIn = false; drive.accessToken = null;
+      authExpiredHandled = true;
       setSyncStatus("Signed out (session expired)", "Sign in with Google", function(){
         setSyncStatus("Opening Google sign-in…");
         connectDrive(false);
@@ -365,6 +368,7 @@
   async function pushToDrive(){
     if(!drive.signedIn || !drive.fileId || !blob) return;
     var wasDirty = dirty;
+    authExpiredHandled = false;
     try{
       await driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+drive.fileId+"?uploadType=media", {
         method:"PATCH", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(blob)
@@ -372,7 +376,9 @@
       if(wasDirty) dirty = false;
       setSyncStatus("Synced just now via Google Drive");
     }catch(e){
-      setSyncStatus("Couldn't reach Drive — saved on this device");
+      if(!authExpiredHandled){
+        setSyncStatus("Couldn't reach Drive — saved on this device");
+      }
     }
   }
 
@@ -426,6 +432,7 @@
   async function finishDriveConnect(){
     hideSetupPanel();
     setSyncStatus("Syncing…");
+    authExpiredHandled = false;
     try{
       drive.fileId = await findOrCreateDriveFile();
       await queueDriveOp(pullFromDrive);
@@ -437,7 +444,11 @@
       });
       await loadAndRender();
     }catch(e){
-      setSyncStatus("Drive error — using local copy");
+      if(!authExpiredHandled){
+        setSyncStatus("Drive error — using local copy", "Try again", function(){
+          finishDriveConnect();
+        });
+      }
     }
   }
 
