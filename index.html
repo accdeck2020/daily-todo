@@ -184,7 +184,12 @@
   function schedulePush(){
     if(!drive.signedIn) return;
     clearTimeout(pushTimer);
-    pushTimer = setTimeout(pushToDrive, 1000);
+    pushTimer = setTimeout(pushToDrive, 350);
+  }
+  function flushPushNow(){
+    if(!drive.signedIn) return;
+    clearTimeout(pushTimer);
+    pushToDrive();
   }
 
   function normalizeDayData(parsed){
@@ -428,11 +433,14 @@
     await initDriveSync();
   });
 
-  window.addEventListener("visibilitychange", function(){
+  document.addEventListener("visibilitychange", function(){
     if(document.visibilityState === "visible" && drive.signedIn && drive.fileId){
       pullFromDrive().then(loadAndRender);
+    } else if(document.visibilityState === "hidden"){
+      flushPushNow();
     }
   });
+  window.addEventListener("pagehide", function(){ flushPushNow(); });
 
   function renderDateHeader(){
     var d = parseDate(state.date);
