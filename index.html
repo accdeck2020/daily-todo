@@ -106,11 +106,44 @@
   .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:var(--ink); color:var(--paper); font-size:13px;
     padding:8px 14px; border-radius:20px; opacity:0; transition:opacity .2s; pointer-events:none; max-width:80%; text-align:center; }
   .toast.show{opacity:0.92;}
+
+  .menu-btn{ flex:0 0 auto; background:var(--card); border:1.5px solid var(--border); border-radius:8px; width:36px; height:36px;
+    font-size:16px; color:var(--pen-dark); cursor:pointer; margin-right:8px; }
+
+  .menu-overlay,.picker-overlay{ position:fixed; inset:0; background:rgba(43,42,40,0.4); display:none; z-index:40; }
+  .menu-overlay.open,.picker-overlay.open{ display:block; }
+  .menu-sheet{ position:absolute; top:0; left:0; bottom:0; width:82%; max-width:340px; background:var(--paper);
+    box-shadow:2px 0 16px rgba(0,0,0,0.25); overflow-y:auto; padding:18px 16px calc(18px + env(safe-area-inset-bottom)); }
+  .picker-sheet{ position:absolute; left:0; right:0; bottom:0; max-width:640px; margin:0 auto; background:var(--paper);
+    border-radius:16px 16px 0 0; box-shadow:0 -2px 16px rgba(0,0,0,0.25); max-height:75vh; overflow-y:auto;
+    padding:16px 18px calc(18px + env(safe-area-inset-bottom)); }
+
+  .menu-title{ font-family:'Kalam',cursive; font-size:22px; font-weight:700; color:var(--pen-dark); margin:0 0 14px 0; display:flex; align-items:center; gap:8px; }
+  .menu-back{ background:none; border:none; font-size:18px; color:var(--pen-dark); cursor:pointer; padding:0 4px 0 0; }
+  .menu-item{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--card); border:1.5px solid var(--border);
+    border-radius:10px; padding:12px 14px; font-size:15px; color:var(--ink); cursor:pointer; margin-bottom:10px; }
+  .menu-item .ic{ font-size:18px; }
+  .menu-search-input{ width:100%; font-size:15px; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px; margin-bottom:14px; background:#fff; color:var(--ink); }
+  .menu-result{ padding:10px 4px; border-bottom:1px solid var(--border); }
+  .menu-result .rdate{ font-size:11px; color:var(--pen-dark); font-weight:600; }
+  .menu-result .rtext{ font-size:14.5px; color:var(--ink); }
+  .menu-result.done .rtext{ color:var(--done); text-decoration:line-through; }
+  .menu-empty{ font-size:13px; color:var(--ink-soft); font-style:italic; padding:10px 4px; }
+  .menu-label-row{ display:flex; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px solid var(--border); }
+  .menu-label-row .lname{ flex:1; font-size:15px; color:var(--ink); }
+  .menu-label-row button{ background:none; border:none; font-size:15px; cursor:pointer; padding:2px 6px; opacity:0.65; }
+
+  .picker-title{ font-family:'Kalam',cursive; font-size:18px; font-weight:700; color:var(--pen-dark); margin:0 0 12px 0; }
+  .picker-option{ display:block; width:100%; text-align:left; background:var(--card); border:1.5px solid var(--border); border-radius:10px;
+    padding:11px 14px; font-size:15px; color:var(--ink); cursor:pointer; margin-bottom:8px; }
+  .picker-option.new{ color:var(--pen-dark); border-color:var(--pen); border-style:dashed; }
+  .picker-cancel{ display:block; width:100%; background:none; border:none; color:var(--ink-soft); font-size:14px; padding:10px; cursor:pointer; margin-top:4px; }
 </style>
 </head>
 <body>
 <div class="page" id="page">
   <header>
+    <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
     <div class="datebox">
       <div class="dateicon"><div class="mon" id="mon">AUG</div><div class="day" id="day">29</div></div>
       <div class="datetext"><div class="wk" id="weekday">Saturday</div><div class="yr" id="year">2026</div></div>
@@ -139,6 +172,14 @@
   </div>
 
   <div id="mainTasks"></div>
+</div>
+
+<div class="menu-overlay" id="menuOverlay">
+  <div class="menu-sheet" id="menuSheet"></div>
+</div>
+
+<div class="picker-overlay" id="pickerOverlay">
+  <div class="picker-sheet" id="pickerSheet"></div>
 </div>
 
 <div class="voice-status" id="voiceStatus"></div>
@@ -272,6 +313,71 @@
     else { sel.value = ""; state.filterLabel = ""; }
     document.getElementById("filterRow").style.display = knownLabels.length ? "flex" : "none";
   }
+
+  async function loadDeletedHistory(){
+    var raw = await storageGet("history:deleted");
+    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
+    return [];
+  }
+  async function saveDeletedHistory(list){
+    if(list.length > 300) list = list.slice(list.length - 300);
+    await storageSet("history:deleted", JSON.stringify(list));
+  }
+  async function recordDeletion(task, fromDateStr){
+    var list = await loadDeletedHistory();
+    list.push({
+      text: task.text, label: task.label || "", subtasks: (task.subtasks||[]).map(function(s){return s.text;}),
+      fromDate: fromDateStr, deletedAt: Date.now()
+    });
+    await saveDeletedHistory(list);
+  }
+
+  function getAllDayEntries(){
+    if(!blob) blob = loadLocalCache();
+    var entries = [];
+    Object.keys(blob.kv).forEach(function(key){
+      var m = key.match(/^diary:(\d{4}-\d{2}-\d{2})$/);
+      if(!m) return;
+      try{
+        var data = normalizeDayData(JSON.parse(blob.kv[key]));
+        entries.push({ dateStr: m[1], data: data });
+      }catch(e){}
+    });
+    entries.sort(function(a,b){ return a.dateStr < b.dateStr ? 1 : -1; });
+    return entries;
+  }
+
+  async function renameLabelEverywhere(oldName, newName){
+    var entries = getAllDayEntries();
+    for(var i=0;i<entries.length;i++){
+      var changed = false;
+      entries[i].data.tasks.forEach(function(t){
+        if(t.label === oldName){ t.label = newName; changed = true; }
+      });
+      if(changed) await saveDay(entries[i].dateStr, entries[i].data);
+    }
+    var idx = knownLabels.indexOf(oldName);
+    if(idx>-1){ knownLabels[idx] = newName; await saveKnownLabels(knownLabels); }
+    if(state.data){
+      state.data.tasks.forEach(function(t){ if(t.label === oldName) t.label = newName; });
+    }
+  }
+  async function deleteLabelEverywhere(name){
+    var entries = getAllDayEntries();
+    for(var i=0;i<entries.length;i++){
+      var changed = false;
+      entries[i].data.tasks.forEach(function(t){
+        if(t.label === name){ t.label = ""; changed = true; }
+      });
+      if(changed) await saveDay(entries[i].dateStr, entries[i].data);
+    }
+    var idx = knownLabels.indexOf(name);
+    if(idx>-1){ knownLabels.splice(idx,1); await saveKnownLabels(knownLabels); }
+    if(state.data){
+      state.data.tasks.forEach(function(t){ if(t.label === name) t.label = ""; });
+    }
+  }
+
   async function findMostRecentPriorDay(dateStr, maxLookback){
     var d = parseDate(dateStr);
     for(var i=1; i<=maxLookback; i++){
@@ -499,13 +605,35 @@
   }
 
   function pickLabel(currentLabel, onPicked){
-    var options = knownLabels.slice();
-    var choice = prompt(
-      "Label for this task (leave blank to remove).\nExisting: " + (options.length ? options.join(", ") : "(none yet)"),
-      currentLabel || ""
-    );
-    if(choice === null) return;
-    onPicked(choice.trim());
+    var overlay = document.getElementById("pickerOverlay");
+    var sheet = document.getElementById("pickerSheet");
+    sheet.innerHTML = "";
+    var title = document.createElement("div"); title.className = "picker-title"; title.textContent = "Choose a label";
+    sheet.appendChild(title);
+
+    var noneBtn = document.createElement("button"); noneBtn.className = "picker-option"; noneBtn.textContent = "No label";
+    noneBtn.addEventListener("click", function(){ overlay.classList.remove("open"); onPicked(""); });
+    sheet.appendChild(noneBtn);
+
+    knownLabels.forEach(function(l){
+      var b = document.createElement("button"); b.className = "picker-option"; b.textContent = l + (l === currentLabel ? "  ✓" : "");
+      b.addEventListener("click", function(){ overlay.classList.remove("open"); onPicked(l); });
+      sheet.appendChild(b);
+    });
+
+    var newBtn = document.createElement("button"); newBtn.className = "picker-option new"; newBtn.textContent = "+ New label…";
+    newBtn.addEventListener("click", function(){
+      overlay.classList.remove("open");
+      var val = prompt("New label name:");
+      if(val !== null && val.trim()){ onPicked(val.trim()); }
+    });
+    sheet.appendChild(newBtn);
+
+    var cancel = document.createElement("button"); cancel.className = "picker-cancel"; cancel.textContent = "Cancel";
+    cancel.addEventListener("click", function(){ overlay.classList.remove("open"); });
+    sheet.appendChild(cancel);
+
+    overlay.classList.add("open");
   }
   function pickPriority(current, onPicked){
     var val = prompt("Priority number (1 = highest, blank to remove):", current != null ? String(current) : "");
@@ -663,6 +791,7 @@
       });
       var del = document.createElement("button"); del.className = "mt-del"; del.textContent = "✕";
       del.addEventListener("click", function(){
+        recordDeletion(t, state.date);
         state.data.tasks = state.data.tasks.filter(function(x){return x.id!==t.id;});
         if(isTargeted) state.activeTarget = null;
         persist(); renderMainTasks();
@@ -790,6 +919,184 @@
     }
     addMainTask(text);
   }
+
+  function formatDateShort(dateStr){
+    var d = parseDate(dateStr);
+    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    return months[d.getMonth()]+" "+d.getDate();
+  }
+
+  function openMenu(){ renderMenuMain(); document.getElementById("menuOverlay").classList.add("open"); }
+  function closeMenu(){ document.getElementById("menuOverlay").classList.remove("open"); }
+
+  function menuHeader(sheet, title, showBack){
+    var h = document.createElement("div"); h.className = "menu-title";
+    if(showBack){
+      var back = document.createElement("button"); back.className = "menu-back"; back.textContent = "←";
+      back.addEventListener("click", renderMenuMain);
+      h.appendChild(back);
+    }
+    var t = document.createElement("span"); t.textContent = title;
+    h.appendChild(t);
+    sheet.appendChild(h);
+  }
+
+  function renderMenuMain(){
+    var sheet = document.getElementById("menuSheet");
+    sheet.innerHTML = "";
+    menuHeader(sheet, "Menu", false);
+    var items = [
+      {icon:"🔍", label:"Search tasks", fn: renderMenuSearch},
+      {icon:"✅", label:"Completed history", fn: renderMenuCompleted},
+      {icon:"🗑️", label:"Deleted history", fn: renderMenuDeleted},
+      {icon:"🏷️", label:"Manage labels", fn: renderMenuLabels},
+    ];
+    items.forEach(function(it){
+      var b = document.createElement("button"); b.className = "menu-item";
+      b.innerHTML = '<span class="ic">'+it.icon+'</span><span>'+it.label+'</span>';
+      b.addEventListener("click", it.fn);
+      sheet.appendChild(b);
+    });
+    var close = document.createElement("button"); close.className = "picker-cancel"; close.textContent = "Close";
+    close.style.marginTop = "8px";
+    close.addEventListener("click", closeMenu);
+    sheet.appendChild(close);
+  }
+
+  function renderMenuSearch(){
+    var sheet = document.getElementById("menuSheet");
+    sheet.innerHTML = "";
+    menuHeader(sheet, "Search tasks", true);
+    var input = document.createElement("input"); input.className = "menu-search-input"; input.placeholder = "Type to search…";
+    sheet.appendChild(input);
+    var resultsWrap = document.createElement("div");
+    sheet.appendChild(resultsWrap);
+
+    function runSearch(){
+      var q = input.value.trim().toLowerCase();
+      resultsWrap.innerHTML = "";
+      if(!q){ return; }
+      var entries = getAllDayEntries();
+      var found = [];
+      entries.forEach(function(entry){
+        entry.data.tasks.forEach(function(t){
+          if(t.text.toLowerCase().indexOf(q) !== -1){
+            found.push({dateStr: entry.dateStr, text: t.text, done: t.done});
+          }
+          (t.subtasks||[]).forEach(function(st){
+            if(st.text.toLowerCase().indexOf(q) !== -1){
+              found.push({dateStr: entry.dateStr, text: t.text+" → "+st.text, done: st.done});
+            }
+          });
+        });
+      });
+      if(!found.length){
+        var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No matches";
+        resultsWrap.appendChild(e);
+        return;
+      }
+      found.forEach(function(r){
+        var row = document.createElement("div"); row.className = "menu-result" + (r.done ? " done":"");
+        var dateEl = document.createElement("div"); dateEl.className = "rdate"; dateEl.textContent = formatDateShort(r.dateStr);
+        var textEl = document.createElement("div"); textEl.className = "rtext"; textEl.textContent = r.text;
+        row.appendChild(dateEl); row.appendChild(textEl);
+        row.style.cursor = "pointer";
+        row.addEventListener("click", function(){
+          state.date = r.dateStr; closeMenu(); loadAndRender();
+        });
+        resultsWrap.appendChild(row);
+      });
+    }
+    input.addEventListener("input", runSearch);
+    input.focus();
+  }
+
+  function renderMenuCompleted(){
+    var sheet = document.getElementById("menuSheet");
+    sheet.innerHTML = "";
+    menuHeader(sheet, "Completed history", true);
+    var entries = getAllDayEntries();
+    var found = [];
+    entries.forEach(function(entry){
+      entry.data.tasks.forEach(function(t){
+        if(t.done) found.push({dateStr: entry.dateStr, text: t.text});
+      });
+    });
+    if(!found.length){
+      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No completed tasks yet";
+      sheet.appendChild(e);
+      return;
+    }
+    found.forEach(function(r){
+      var row = document.createElement("div"); row.className = "menu-result done"; row.style.cursor = "pointer";
+      var dateEl = document.createElement("div"); dateEl.className = "rdate"; dateEl.textContent = formatDateShort(r.dateStr);
+      var textEl = document.createElement("div"); textEl.className = "rtext"; textEl.textContent = r.text;
+      row.appendChild(dateEl); row.appendChild(textEl);
+      row.addEventListener("click", function(){ state.date = r.dateStr; closeMenu(); loadAndRender(); });
+      sheet.appendChild(row);
+    });
+  }
+
+  async function renderMenuDeleted(){
+    var sheet = document.getElementById("menuSheet");
+    sheet.innerHTML = "";
+    menuHeader(sheet, "Deleted history", true);
+    var list = await loadDeletedHistory();
+    if(!list.length){
+      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "Nothing deleted yet";
+      sheet.appendChild(e);
+      return;
+    }
+    list.slice().reverse().forEach(function(r){
+      var row = document.createElement("div"); row.className = "menu-result";
+      var when = new Date(r.deletedAt);
+      var dateEl = document.createElement("div"); dateEl.className = "rdate";
+      dateEl.textContent = "Was on " + formatDateShort(r.fromDate) + " · deleted " + when.toLocaleDateString();
+      var textEl = document.createElement("div"); textEl.className = "rtext";
+      textEl.textContent = r.text + (r.label ? "  ["+r.label+"]" : "");
+      row.appendChild(dateEl); row.appendChild(textEl);
+      sheet.appendChild(row);
+    });
+  }
+
+  async function renderMenuLabels(){
+    var sheet = document.getElementById("menuSheet");
+    sheet.innerHTML = "";
+    menuHeader(sheet, "Manage labels", true);
+    if(!knownLabels.length){
+      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No labels yet";
+      sheet.appendChild(e);
+      return;
+    }
+    knownLabels.slice().forEach(function(l){
+      var row = document.createElement("div"); row.className = "menu-label-row";
+      var name = document.createElement("div"); name.className = "lname"; name.textContent = l;
+      var editBtn = document.createElement("button"); editBtn.textContent = "✎";
+      editBtn.addEventListener("click", async function(){
+        var val = prompt("Rename label:", l);
+        if(val !== null && val.trim() && val.trim() !== l){
+          await renameLabelEverywhere(l, val.trim());
+          renderMenuLabels(); renderMainTasks();
+        }
+      });
+      var delBtn = document.createElement("button"); delBtn.textContent = "✕";
+      delBtn.addEventListener("click", async function(){
+        if(!confirm('Delete label "'+l+'"? It will be removed from all tasks using it.')) return;
+        await deleteLabelEverywhere(l);
+        renderMenuLabels(); renderMainTasks(); populateFilterOptions();
+      });
+      row.appendChild(name); row.appendChild(editBtn); row.appendChild(delBtn);
+      sheet.appendChild(row);
+    });
+  }
+
+  document.getElementById("menuBtn").addEventListener("click", openMenu);
+  document.getElementById("menuOverlay").addEventListener("click", function(e){
+    if(e.target.id === "menuOverlay") closeMenu();
+  });
+  document.getElementById("pickerOverlay").addEventListener("click", function(e){
+    if(e.target.id === "pickerOverlay") e.target.classList.remove("open");
+  });
 
   document.getElementById("prevDay").addEventListener("click", function(){ shiftDay(-1); });
   document.getElementById("nextDay").addEventListener("click", function(){ shiftDay(1); });
