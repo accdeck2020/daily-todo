@@ -242,13 +242,18 @@
 
   function normalizeDayData(parsed){
     if(!parsed) return null;
-    if(Array.isArray(parsed.tasks)) return parsed;
+    if(Array.isArray(parsed.tasks)){
+      parsed.tasks.forEach(function(t){ if(!t.originId) t.originId = t.id; });
+      return parsed;
+    }
     if(Array.isArray(parsed.categories)){
       var migrated = [];
       parsed.categories.forEach(function(cat){
         (cat.tasks||[]).forEach(function(t){
+          var newId = t.id || uid();
           migrated.push({
-            id: t.id || uid(),
+            id: newId,
+            originId: t.originId || newId,
             text: t.text,
             done: !!t.done,
             label: t.label || "",
@@ -264,27 +269,59 @@
     return { tasks: [] };
   }
 
+  async function getDeletedOriginIdsForDate(dateStr){
+    var list = await loadDeletedHistory();
+    var set = {};
+    list.forEach(function(entry){
+      if(entry.fromDate === dateStr && entry.originId){ set[entry.originId] = true; }
+    });
+    return set;
+  }
+
   async function loadDay(dateStr){
     var raw = await storageGet("diary:"+dateStr);
+    var current = { tasks: [] };
     if(raw){
-      try{ return normalizeDayData(JSON.parse(raw)); }catch(e){}
+      try{ current = normalizeDayData(JSON.parse(raw)); }catch(e){ current = { tasks: [] }; }
     }
     var prior = await findMostRecentPriorDay(dateStr, 30);
-    var tasks = [];
     if(prior && prior.tasks){
+      var existingOriginIds = {};
+      current.tasks.forEach(function(t){ existingOriginIds[t.originId || t.id] = true; });
+      var excluded = await getDeletedOriginIdsForDate(dateStr);
       prior.tasks.forEach(function(t){
-        if(!t.done){
-          tasks.push({
-            id: uid(), text: t.text, done:false, label: t.label || "",
+        var oid = t.originId || t.id;
+        if(!t.done && !existingOriginIds[oid] && !excluded[oid]){
+          current.tasks.push({
+            id: uid(), originId: oid, text: t.text, done:false, label: t.label || "",
             priority: (typeof t.priority === "number") ? t.priority : null,
             reminderTime: null,
             moveHistory: t.moveHistory || [],
             subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done, priority: (typeof st.priority === "number") ? st.priority : null}; })
           });
+          existingOriginIds[oid] = true;
         }
       });
     }
-    return { tasks: tasks };
+    return current;
+  }
+  async function propagateDoneForward(originId, fromDateStr){
+    var d = parseDate(fromDateStr);
+    for(var i=1; i<=60; i++){
+      var next = new Date(d.getTime());
+      next.setDate(next.getDate()+i);
+      var nextStr = next.getFullYear()+"-"+pad(next.getMonth()+1)+"-"+pad(next.getDate());
+      var raw = await storageGet("diary:"+nextStr);
+      if(!raw) continue;
+      try{
+        var data = normalizeDayData(JSON.parse(raw));
+        var changed = false;
+        data.tasks.forEach(function(t){
+          if((t.originId||t.id) === originId && !t.done){ t.done = true; changed = true; }
+        });
+        if(changed) await saveDay(nextStr, data);
+      }catch(e){}
+    }
   }
   async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
   async function loadKnownLabels(){
@@ -327,7 +364,7 @@
     var list = await loadDeletedHistory();
     list.push({
       text: task.text, label: task.label || "", subtasks: (task.subtasks||[]).map(function(s){return s.text;}),
-      fromDate: fromDateStr, deletedAt: Date.now()
+      fromDate: fromDateStr, deletedAt: Date.now(), originId: task.originId || task.id
     });
     await saveDeletedHistory(list);
   }
@@ -732,7 +769,11 @@
       var row = document.createElement("div"); row.className = "mt-row";
       var bullet = document.createElement("div"); bullet.className = "bullet";
       bullet.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
-      bullet.addEventListener("click", function(){ t.done = !t.done; persist(); renderMainTasks(); });
+      bullet.addEventListener("click", function(){
+        t.done = !t.done;
+        persist(); renderMainTasks();
+        if(t.done){ propagateDoneForward(t.originId || t.id, state.date); }
+      });
 
       var txtWrap = document.createElement("div"); txtWrap.className = "mt-text-wrap";
       var badges = document.createElement("div"); badges.className = "mt-badges";
@@ -896,7 +937,8 @@
   }
   function addMainTask(text){
     if(!text || !text.trim()) return;
-    state.data.tasks.push({id:uid(), text:text.trim(), done:false, label:"", priority:null, reminderTime:null, moveHistory:[], subtasks:[]});
+    var newId = uid();
+    state.data.tasks.push({id:newId, originId:newId, text:text.trim(), done:false, label:"", priority:null, reminderTime:null, moveHistory:[], subtasks:[]});
     persist(); renderMainTasks();
     scheduleAllReminders();
     showToast('Main task added');
