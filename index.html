@@ -2,1195 +2,1221 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Daily To-Do</title>
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#FAF6EA">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FAF6EA'/%3E%3Crect x='14' y='8' width='6' height='84' fill='%23C41E3A'/%3E%3Cline x1='30' y1='30' x2='90' y2='30' stroke='%23C9D3DC' stroke-width='3'/%3E%3Cline x1='30' y1='50' x2='90' y2='50' stroke='%23C9D3DC' stroke-width='3'/%3E%3Cline x1='30' y1='70' x2='90' y2='70' stroke='%23C9D3DC' stroke-width='3'/%3E%3Ccircle cx='30' cy='30' r='6' fill='none' stroke='%232B2A28' stroke-width='3'/%3E%3C/svg%3E">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23FAF6EA'/%3E%3Crect x='14' y='8' width='6' height='84' fill='%23C41E3A'/%3E%3Cline x1='30' y1='30' x2='90' y2='30' stroke='%23C9D3DC' stroke-width='3'/%3E%3Cline x1='30' y1='50' x2='90' y2='50' stroke='%23C9D3DC' stroke-width='3'/%3E%3Cline x1='30' y1='70' x2='90' y2='70' stroke='%23C9D3DC' stroke-width='3'/%3E%3Ccircle cx='30' cy='30' r='6' fill='none' stroke='%232B2A28' stroke-width='3'/%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Diary To-Do</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Kalam:wght@400;700&family=Patrick+Hand&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --paper:#FAF6EA; --paper-line:#CBD5DE; --margin-red:#C64B54; --ink:#2B2A28;
-    --ink-soft:#6B6660; --pen:#B4232F; --pen-dark:#8C1A24; --done:#A6A198;
-    --card:#FFFDF7; --border:#E4DCC8;
-  }
-  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;}
-  body{ background:var(--paper); color:var(--ink); font-family:'Inter',system-ui,sans-serif; min-height:100vh; padding-bottom:110px; }
-  .page{ max-width:640px; margin:0 auto; position:relative; padding:18px 18px 18px 34px;
-    background-image: repeating-linear-gradient(var(--paper) 0px, var(--paper) 37px, var(--paper-line) 38px);
-    min-height:100vh; }
-  .page::before{ content:""; position:absolute; left:22px; top:0; bottom:0; width:2px; background:var(--margin-red); opacity:0.55; }
-  header{ display:flex; align-items:center; justify-content:space-between; padding:6px 0 14px 0; gap:10px; }
-  .datebox{ display:flex; align-items:center; gap:12px; }
-  .dateicon{ background:var(--card); border:1.5px solid var(--border); border-radius:10px; padding:6px 12px; text-align:center; min-width:64px; }
-  .dateicon .mon{font-size:11px; letter-spacing:1px; color:var(--pen); font-weight:600;}
-  .dateicon .day{font-size:22px; font-weight:700; color:var(--pen-dark); font-family:'Kalam',cursive; line-height:1.1;}
-  .datetext{font-family:'Kalam',cursive;}
-  .datetext .wk{font-size:20px; font-weight:700;}
-  .datetext .yr{font-size:12px; color:var(--ink-soft);}
-  .navbtns{display:flex; gap:6px;}
-  .navbtns button{ background:var(--card); border:1.5px solid var(--border); border-radius:8px; width:32px; height:32px; font-size:15px; color:var(--ink); cursor:pointer; }
-  .todaybtn{ font-size:11px; border:1.5px solid var(--border); background:var(--card); border-radius:8px; padding:5px 9px; color:var(--ink-soft); cursor:pointer; }
-  .syncrow{ display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:11.5px; color:var(--ink-soft); margin:-8px 2px 12px 0; }
-  .syncrow button{ font-size:11px; border:1px solid var(--border); background:var(--card); border-radius:6px; padding:3px 8px; color:var(--pen-dark); cursor:pointer; }
-  .setup{ background:var(--card); border:1.5px solid var(--border); border-radius:12px; padding:16px; margin:10px 0 20px 0; }
-  .setup h3{ font-family:'Kalam',cursive; margin:0 0 6px 0; font-size:18px; color:var(--pen-dark); }
-  .setup p{ font-size:13px; color:var(--ink-soft); line-height:1.5; margin:0 0 10px 0; }
-  .setup input{ width:100%; font-size:14px; padding:9px 10px; border:1.5px solid var(--border); border-radius:8px; margin-bottom:8px; background:#fff; color:var(--ink); }
-  .setup button{ background:var(--pen); color:#fff; border:none; border-radius:8px; padding:9px 14px; font-size:13px; cursor:pointer; }
+:root{
+  --paper:#f6f0dc;
+  --paper-dark:#efe6c8;
+  --line:#d9cdaa;
+  --margin-red:#c1443c;
+  --ink:#2b2a25;
+  --ink-soft:#5b5748;
+  --accent:#c1443c;
+  --accent-dark:#9c332c;
+  --chip:#e7dcb8;
+  --done:#9a9382;
+  --shadow: 0 2px 10px rgba(0,0,0,.12);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:#3a352b;
+  color:var(--ink);
+  font-family:'Patrick Hand','Kalam',cursive,sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+}
+#app{
+  width:100%;
+  max-width:640px;
+  min-height:100vh;
+  background:var(--paper);
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  box-shadow: var(--shadow);
+}
+/* ---------- header ---------- */
+.app-header{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 14px 10px 14px;
+  background:var(--paper-dark);
+  border-bottom:2px solid var(--line);
+}
+.icon-round-btn{
+  background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink);
+  width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.icon-round-btn:active{background:rgba(0,0,0,.08);}
+.date-nav{
+  flex:1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+}
+.nav-arrow{background:none;border:none;font-size:22px;color:var(--accent);cursor:pointer;padding:4px 8px;}
+.date-box{
+  background:var(--accent);
+  color:#fff;
+  border-radius:8px;
+  width:54px;
+  text-align:center;
+  padding:4px 2px;
+  font-family:'Kalam',cursive;
+  line-height:1.05;
+  box-shadow: 0 2px 4px rgba(0,0,0,.2);
+}
+.date-box .dnum{font-size:22px;font-weight:700;}
+.date-box .dmon{font-size:11px;letter-spacing:1px;}
+.date-info{text-align:left;}
+.date-info .weekday{font-family:'Kalam',cursive;font-size:17px;font-weight:700;}
+.date-info .year{font-size:13px;color:var(--ink-soft);}
+.today-btn{
+  background:none;border:1.5px solid var(--accent);color:var(--accent);
+  border-radius:14px;font-size:12px;padding:3px 9px;cursor:pointer;font-family:inherit;
+}
+.today-btn.active{background:var(--accent);color:#fff;}
 
-  .filterrow{ display:flex; align-items:center; gap:8px; margin:0 2px 14px 0; font-size:12.5px; color:var(--ink-soft); }
-  .filterrow select{ font-size:12.5px; border:1.5px solid var(--border); background:var(--card); color:var(--ink); border-radius:8px; padding:4px 6px; }
+/* ---------- filter bar ---------- */
+.filter-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;background:var(--paper);
+  border-bottom:1px solid var(--line);
+}
+.filter-bar label{font-size:13px;color:var(--ink-soft);}
+.filter-bar select{
+  flex:1;font-family:inherit;font-size:14px;padding:5px 8px;border-radius:6px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);
+}
+#syncStatus{font-size:12px;color:var(--ink-soft);white-space:nowrap;}
+#syncStatus button{
+  background:none;border:1px solid var(--accent);color:var(--accent);border-radius:10px;
+  padding:3px 8px;font-size:11px;cursor:pointer;font-family:inherit;
+}
 
-  .maintask{ margin:18px 0; }
-  .mt-row{ display:flex; align-items:flex-start; gap:9px; }
-  .bullet{ flex:0 0 auto; width:22px; height:22px; margin-top:2px; border-radius:50%; border:2.5px solid var(--pen);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--card); }
-  .maintask.done .bullet{ border-color:var(--done); background:var(--done); }
-  .bullet svg{width:13px; height:13px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
-  .maintask.done .bullet svg{opacity:1;}
-  .mt-text-wrap{ flex:1; min-width:0; display:flex; flex-direction:column; gap:3px; }
-  .mt-badges{ display:flex; flex-wrap:wrap; gap:5px; align-items:center; }
-  .mt-label{ font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--pen); color:var(--pen-dark);
-    border-radius:10px; padding:1px 8px; cursor:pointer; }
-  .mt-label.empty{ border-style:dashed; color:var(--ink-soft); border-color:var(--border); }
-  .mt-priority{ font-size:11px; font-weight:700; font-family:'Inter',sans-serif; background:var(--pen); color:#fff;
-    border-radius:10px; padding:1px 7px; cursor:pointer; }
-  .mt-reminder{ font-size:11px; font-family:'Inter',sans-serif; background:var(--card); border:1px solid var(--ink-soft); color:var(--ink-soft);
-    border-radius:10px; padding:1px 8px; cursor:pointer; }
-  .mt-text{ font-family:'Kalam',cursive; font-size:20px; font-weight:700; color:var(--pen-dark); outline:none;
-    white-space:normal; word-break:break-word; line-height:1.3; border-bottom:2px solid transparent; }
-  .mt-text:focus{ border-bottom:2px solid var(--pen); }
-  .maintask.done .mt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
-  .mt-label-toggle,.mt-prio-toggle,.mt-remind-toggle,.mt-date-toggle,.mt-history-toggle{ flex:0 0 auto; background:none; border:none; font-size:15px; cursor:pointer; padding:4px 3px; opacity:0.55; }
-  .mt-history-toggle{ position:relative; }
-  .mt-history-toggle .count{ position:absolute; top:-2px; right:-2px; background:var(--pen); color:#fff; font-size:9px; border-radius:8px; padding:0 3px; line-height:1.3; }
-  .mt-sub-toggle{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:17px; cursor:pointer; padding:4px 3px; opacity:0.7; }
-  .mt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:16px; cursor:pointer; padding:4px 3px; opacity:0.5; }
-  .maintask.targeted .mt-row{ background:var(--card); border-radius:8px; box-shadow:inset 0 0 0 1.5px var(--pen); }
+/* ---------- task list / ruled paper ---------- */
+.task-list{
+  flex:1;
+  position:relative;
+  padding:6px 14px 90px 30px;
+  background-image: repeating-linear-gradient(var(--paper) 0 43px, var(--line) 43px 44px);
+  background-position: 0 4px;
+}
+.task-list::before{
+  content:"";
+  position:absolute;
+  left:20px;top:0;bottom:0;width:2px;
+  background:var(--margin-red);
+  opacity:.55;
+}
+.empty-state{
+  text-align:center;color:var(--ink-soft);padding:40px 10px;font-size:16px;
+}
+.main-task{
+  position:relative;
+  margin:10px 0 14px 0;
+  padding-bottom:4px;
+}
+.mt-row{
+  display:flex;align-items:flex-start;gap:8px;
+}
+.mt-check{
+  width:20px;height:20px;margin-top:6px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;
+}
+.mt-text{
+  flex:1;font-size:19px;line-height:1.35;padding:4px 2px;outline:none;
+  border-radius:4px;
+  word-break:break-word;
+}
+.mt-text:focus{background:rgba(255,255,255,.6);}
+.main-task.done .mt-text{ text-decoration:line-through; color:var(--done); }
+.mt-actions{
+  display:flex;align-items:center;gap:0;flex-shrink:0;flex-wrap:nowrap;justify-content:flex-end;
+}
+.icon-btn{
+  background:none;border:none;font-size:13px;cursor:pointer;color:var(--ink-soft);
+  padding:4px 3px;border-radius:6px;position:relative;font-family:inherit;
+}
+.icon-btn:active{background:rgba(0,0,0,.08);}
+.pri-btn{font-weight:700;color:var(--accent);}
+.badge{
+  position:absolute;top:-2px;right:-2px;background:var(--accent);color:#fff;
+  font-size:9px;border-radius:50%;min-width:14px;height:14px;line-height:14px;text-align:center;padding:0 2px;
+}
+.mt-label-chip{
+  display:inline-block;margin:2px 0 4px 28px;background:var(--chip);color:var(--ink-soft);
+  font-size:12px;padding:2px 8px;border-radius:10px;
+}
+.mt-label-chip.small{font-size:11px;margin:0 0 0 6px;}
+.tiny-list{margin-left:28px;}
+.tiny-task{
+  display:flex;align-items:center;gap:7px;padding:3px 0;
+}
+.tt-check{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;}
+.tt-text{flex:1;font-size:15.5px;outline:none;padding:2px;border-radius:4px;word-break:break-word;}
+.tt-text:focus{background:rgba(255,255,255,.6);}
+.tiny-task.done .tt-text{text-decoration:line-through;color:var(--done);}
+.tt-pri-btn{font-size:12px;color:var(--accent);font-weight:700;background:none;border:none;cursor:pointer;padding:2px 5px;}
+.tt-del-btn{background:none;border:none;color:var(--ink-soft);font-size:12px;cursor:pointer;padding:2px 5px;}
+.tiny-add-row{
+  margin:4px 0 0 28px;font-size:13px;color:var(--accent-dark);
+  background:#fff8e6;border:1px dashed var(--accent);border-radius:6px;padding:5px 8px;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.tiny-add-row button{background:none;border:none;color:var(--accent-dark);font-size:15px;cursor:pointer;}
 
-  ul.tinytasks{list-style:none; margin:6px 0 4px 27px; padding:0 0 0 12px; border-left:2px solid var(--border);}
-  li.tinytask{ display:flex; align-items:flex-start; gap:8px; padding:5px 2px; }
-  .tt-bullet{ flex:0 0 auto; width:16px; height:16px; margin-top:3px; border-radius:50%; border:1.7px solid var(--ink-soft);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; background:var(--card); }
-  li.tinytask.done .tt-bullet{ border-color:var(--done); background:var(--done); }
-  .tt-bullet svg{width:9px; height:9px; opacity:0; stroke:var(--card); stroke-width:3; fill:none;}
-  li.tinytask.done .tt-bullet svg{opacity:1;}
-  .tt-text{ flex:1; font-size:15px; line-height:1.4; padding-top:1px; color:var(--ink); outline:none; }
-  li.tinytask.done .tt-text{ color:var(--done); text-decoration:line-through; text-decoration-thickness:1.5px; }
-  .tt-priority{ flex:0 0 auto; font-size:10px; font-weight:700; font-family:'Inter',sans-serif; background:var(--pen); color:#fff;
-    border-radius:9px; padding:0px 6px; cursor:pointer; align-self:center; }
-  .tt-prio-toggle{ flex:0 0 auto; background:none; border:none; font-size:12px; cursor:pointer; padding:0 2px; opacity:0.5; }
-  .tt-del{ flex:0 0 auto; background:none; border:none; color:var(--ink-soft); font-size:13px; cursor:pointer; padding:0 3px; opacity:0.5; }
+/* ---------- input bar ---------- */
+.input-bar{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:640px;
+  display:flex;align-items:center;gap:8px;
+  padding:10px 12px;
+  background:var(--paper-dark);border-top:2px solid var(--line);
+  padding-bottom:calc(10px + env(safe-area-inset-bottom));
+}
+#textInput{
+  flex:1;font-family:inherit;font-size:16px;padding:10px 12px;border-radius:20px;
+  border:1px solid var(--line);background:#fff;color:var(--ink);
+}
+.mic-btn{
+  width:46px;height:46px;border-radius:50%;background:var(--accent);color:#fff;border:none;
+  font-size:20px;cursor:pointer;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.25);
+}
+.mic-btn.listening{animation:pulse 1s infinite;background:var(--accent-dark);}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(193,68,60,.5);}70%{box-shadow:0 0 0 12px rgba(193,68,60,0);}100%{box-shadow:0 0 0 0 rgba(193,68,60,0);}}
 
-  .tt-add-row{ display:flex; align-items:center; gap:8px; margin:2px 0 8px 27px; padding-left:12px; border-left:2px solid var(--pen); }
-  .tt-add-row input{ flex:1; font-size:14px; border:none; border-bottom:1.5px dashed var(--border); background:transparent; padding:5px 2px; outline:none; color:var(--ink); }
-  .tt-add-row .hint{ font-size:11.5px; color:var(--pen-dark); white-space:nowrap; }
+/* ---------- side panel ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40;
+}
+.overlay.open{opacity:1;pointer-events:auto;}
+.side-panel{
+  position:fixed;top:0;left:0;bottom:0;width:86%;max-width:360px;
+  background:var(--paper);z-index:41;transform:translateX(-100%);transition:transform .25s;
+  display:flex;flex-direction:column;box-shadow:2px 0 12px rgba(0,0,0,.3);
+}
+.side-panel.open{transform:translateX(0);}
+.panel-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px;background:var(--paper-dark);border-bottom:2px solid var(--line);
+}
+.panel-header h2{margin:0;font-family:'Kalam',cursive;font-size:20px;}
+.menu-nav{display:flex;flex-wrap:wrap;gap:6px;padding:10px 14px;border-bottom:1px solid var(--line);}
+.menu-nav button{
+  font-family:inherit;font-size:13px;padding:6px 10px;border-radius:14px;border:1px solid var(--line);
+  background:#fff;cursor:pointer;color:var(--ink-soft);
+}
+.menu-nav button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.menu-body{flex:1;overflow-y:auto;padding:12px 14px;}
+.menu-body input[type=text]{
+  width:100%;font-family:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);margin-bottom:10px;
+}
+.search-result{
+  display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:8px 10px;margin-bottom:6px;font-family:inherit;font-size:14px;cursor:pointer;color:var(--ink);
+}
+.sr-date{float:right;color:var(--ink-soft);font-size:12px;}
+.hist-row{background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-bottom:6px;font-size:14px;}
+.hist-time{color:var(--ink-soft);font-size:11px;}
+.del-tiny{font-size:12px;color:var(--ink-soft);}
+.del-time{font-size:11px;color:var(--ink-soft);}
+.empty{color:var(--ink-soft);font-size:14px;}
+.label-row{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 10px;margin-bottom:6px;}
+.label-row span{flex:1;font-size:15px;}
+.label-row button{font-family:inherit;font-size:12px;padding:4px 8px;border-radius:10px;border:1px solid var(--line);background:var(--paper);cursor:pointer;}
 
-  .empty-hint{ font-size:13px; color:var(--ink-soft); font-style:italic; padding:24px 2px; text-align:center; }
+/* ---------- bottom sheet ---------- */
+.sheet-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;
+  display:flex;align-items:flex-end;justify-content:center;
+}
+.sheet-overlay.open{opacity:1;pointer-events:auto;}
+.sheet{
+  width:100%;max-width:640px;background:var(--paper);border-radius:16px 16px 0 0;
+  padding:16px 18px calc(20px + env(safe-area-inset-bottom)) 18px;
+  transform:translateY(100%);transition:transform .25s;
+  max-height:70vh;overflow-y:auto;
+}
+.sheet-overlay.open .sheet{transform:translateY(0);}
+.sheet h3{margin:0 0 10px 0;font-family:'Kalam',cursive;font-size:19px;}
+.sheet-option{
+  display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line);
+  border-radius:8px;padding:10px 12px;margin-bottom:6px;font-family:inherit;font-size:15px;cursor:pointer;color:var(--ink);
+}
+.sheet-option.selected{border-color:var(--accent);background:#fdf1ee;color:var(--accent-dark);font-weight:700;}
+.sheet input[type=text],.sheet input[type=number],.sheet input[type=time]{
+  font-family:inherit;font-size:16px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);margin-right:8px;margin-bottom:8px;width:100%;
+}
+.sheet button.primary, #priSaveBtn, #remSaveBtn, #saveNewLabelBtn, #renameLabelSaveBtn{
+  background:var(--accent);color:#fff;border:none;border-radius:8px;padding:9px 14px;font-family:inherit;font-size:14px;cursor:pointer;margin-right:6px;
+}
+.sheet button.secondary, #priClearBtn, #remClearBtn{
+  background:none;border:1px solid var(--line);border-radius:8px;padding:9px 14px;font-family:inherit;font-size:14px;cursor:pointer;color:var(--ink-soft);
+}
 
-  .dock{ position:fixed; left:0; right:0; bottom:0; display:flex; align-items:center; justify-content:center; gap:14px;
-    padding:14px 18px calc(14px + env(safe-area-inset-bottom)); background:linear-gradient(to top, var(--paper) 60%, rgba(250,246,234,0)); }
-  .textadd{ flex:1; max-width:420px; background:var(--card); border:1.5px solid var(--border); border-radius:22px; padding:11px 16px; font-size:15px; font-family:'Inter',sans-serif; outline:none; color:var(--ink); }
-  .mic{ flex:0 0 auto; width:54px; height:54px; border-radius:50%; background:var(--pen); border:none; color:#fff; font-size:22px;
-    display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 3px 10px rgba(140,26,36,0.35); }
-  .mic.listening{ background:var(--pen-dark); animation:pulse 1.1s infinite; }
-  @keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(140,26,36,0.45);} 70%{box-shadow:0 0 0 16px rgba(140,26,36,0);} 100%{box-shadow:0 0 0 0 rgba(140,26,36,0);} }
-  .voice-status{ position:fixed; left:0; right:0; bottom:88px; text-align:center; font-family:'Kalam',cursive; font-size:15px; color:var(--pen-dark); pointer-events:none; }
-  .toast{ position:fixed; left:50%; transform:translateX(-50%); bottom:96px; background:var(--ink); color:var(--paper); font-size:13px;
-    padding:8px 14px; border-radius:20px; opacity:0; transition:opacity .2s; pointer-events:none; max-width:80%; text-align:center; }
-  .toast.show{opacity:0.92;}
+/* ---------- setup panel ---------- */
+.setup-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60;
+  display:flex;align-items:center;justify-content:center;padding:16px;
+}
+.setup-overlay.open{opacity:1;pointer-events:auto;}
+.setup-box{
+  background:var(--paper);border-radius:14px;max-width:460px;width:100%;padding:20px;max-height:88vh;overflow-y:auto;
+  box-shadow:0 8px 30px rgba(0,0,0,.4);
+}
+.setup-box h2{font-family:'Kalam',cursive;margin-top:0;}
+.setup-box label{font-size:13px;color:var(--ink-soft);display:block;margin-top:10px;}
+.setup-box input[type=text]{width:100%;font-family:inherit;font-size:15px;padding:8px 10px;border-radius:8px;border:1px solid var(--line);margin-top:4px;}
+.setup-box .row{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap;}
+.setup-box button{font-family:inherit;font-size:14px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;}
+.setup-box .btn-primary{background:var(--accent);color:#fff;}
+.setup-box .btn-secondary{background:#fff;border:1px solid var(--line) !important;color:var(--ink);}
+.setup-box .uri-box{
+  background:#fff;border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:12.5px;
+  word-break:break-all;font-family:monospace;flex:1;
+}
+.setup-box .status-line{margin-top:12px;font-size:14px;font-weight:700;}
+.setup-box .close-x{float:right;background:none;font-size:20px;color:var(--ink-soft);cursor:pointer;}
+.setup-box ol{font-size:13.5px;color:var(--ink-soft);padding-left:20px;}
+.setup-box ol li{margin-bottom:6px;}
 
-  .menu-btn{ flex:0 0 auto; background:var(--card); border:1.5px solid var(--border); border-radius:8px; width:36px; height:36px;
-    font-size:16px; color:var(--pen-dark); cursor:pointer; margin-right:8px; }
-
-  .menu-overlay,.picker-overlay{ position:fixed; inset:0; background:rgba(43,42,40,0.4); display:none; z-index:40; }
-  .menu-overlay.open,.picker-overlay.open{ display:block; }
-  .menu-sheet{ position:absolute; top:0; left:0; bottom:0; width:82%; max-width:340px; background:var(--paper);
-    box-shadow:2px 0 16px rgba(0,0,0,0.25); overflow-y:auto; padding:18px 16px calc(18px + env(safe-area-inset-bottom)); }
-  .picker-sheet{ position:absolute; left:0; right:0; bottom:0; max-width:640px; margin:0 auto; background:var(--paper);
-    border-radius:16px 16px 0 0; box-shadow:0 -2px 16px rgba(0,0,0,0.25); max-height:75vh; overflow-y:auto;
-    padding:16px 18px calc(18px + env(safe-area-inset-bottom)); }
-
-  .menu-title{ font-family:'Kalam',cursive; font-size:22px; font-weight:700; color:var(--pen-dark); margin:0 0 14px 0; display:flex; align-items:center; gap:8px; }
-  .menu-back{ background:none; border:none; font-size:18px; color:var(--pen-dark); cursor:pointer; padding:0 4px 0 0; }
-  .menu-item{ display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:var(--card); border:1.5px solid var(--border);
-    border-radius:10px; padding:12px 14px; font-size:15px; color:var(--ink); cursor:pointer; margin-bottom:10px; }
-  .menu-item .ic{ font-size:18px; }
-  .menu-search-input{ width:100%; font-size:15px; padding:10px 12px; border:1.5px solid var(--border); border-radius:10px; margin-bottom:14px; background:#fff; color:var(--ink); }
-  .menu-result{ padding:10px 4px; border-bottom:1px solid var(--border); }
-  .menu-result .rdate{ font-size:11px; color:var(--pen-dark); font-weight:600; }
-  .menu-result .rtext{ font-size:14.5px; color:var(--ink); }
-  .menu-result.done .rtext{ color:var(--done); text-decoration:line-through; }
-  .menu-empty{ font-size:13px; color:var(--ink-soft); font-style:italic; padding:10px 4px; }
-  .menu-label-row{ display:flex; align-items:center; gap:8px; padding:10px 4px; border-bottom:1px solid var(--border); }
-  .menu-label-row .lname{ flex:1; font-size:15px; color:var(--ink); }
-  .menu-label-row button{ background:none; border:none; font-size:15px; cursor:pointer; padding:2px 6px; opacity:0.65; }
-
-  .picker-title{ font-family:'Kalam',cursive; font-size:18px; font-weight:700; color:var(--pen-dark); margin:0 0 12px 0; }
-  .picker-option{ display:block; width:100%; text-align:left; background:var(--card); border:1.5px solid var(--border); border-radius:10px;
-    padding:11px 14px; font-size:15px; color:var(--ink); cursor:pointer; margin-bottom:8px; }
-  .picker-option.new{ color:var(--pen-dark); border-color:var(--pen); border-style:dashed; }
-  .picker-cancel{ display:block; width:100%; background:none; border:none; color:var(--ink-soft); font-size:14px; padding:10px; cursor:pointer; margin-top:4px; }
+/* ---------- toast ---------- */
+#toastContainer{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:80;display:flex;flex-direction:column;gap:6px;align-items:center;width:100%;max-width:600px;pointer-events:none;}
+.toast{
+  background:var(--ink);color:#fff;padding:9px 16px;border-radius:20px;font-size:14px;
+  opacity:0;transform:translateY(-10px);transition:opacity .25s, transform .25s;box-shadow:0 4px 12px rgba(0,0,0,.3);
+  font-family:'Patrick Hand',sans-serif;
+}
+.toast.show{opacity:1;transform:translateY(0);}
 </style>
 </head>
 <body>
-<div class="page" id="page">
-  <header>
-    <button id="menuBtn" class="menu-btn" aria-label="Menu">☰</button>
-    <div class="datebox">
-      <div class="dateicon"><div class="mon" id="mon">AUG</div><div class="day" id="day">29</div></div>
-      <div class="datetext"><div class="wk" id="weekday">Saturday</div><div class="yr" id="year">2026</div></div>
+
+<div id="app">
+  <header class="app-header">
+    <button id="menuBtn" class="icon-round-btn" aria-label="Menu">&#9776;</button>
+    <div class="date-nav">
+      <button id="prevDayBtn" class="nav-arrow" aria-label="Previous day">&#8249;</button>
+      <div class="date-box"><div class="dnum" id="dateNum">1</div><div class="dmon" id="dateMon">JAN</div></div>
+      <div class="date-info">
+        <div class="weekday" id="weekdayLbl">Day</div>
+        <div class="year" id="yearLbl">2026</div>
+      </div>
+      <button id="todayBtn" class="today-btn">Today</button>
+      <button id="nextDayBtn" class="nav-arrow" aria-label="Next day">&#8250;</button>
     </div>
-    <div class="navbtns">
-      <button id="prevDay" aria-label="Previous day">‹</button>
-      <button class="todaybtn" id="todayBtn">Today</button>
-      <button id="nextDay" aria-label="Next day">›</button>
-    </div>
+    <button id="setupOpenBtn" class="icon-round-btn" aria-label="Drive sync" title="Drive sync">&#9729;</button>
   </header>
-  <div class="syncrow">
-    <span id="syncStatus">Checking sync…</span>
-    <button id="syncActionBtn" style="display:none;"></button>
+
+  <div class="filter-bar">
+    <label for="labelFilter">Label:</label>
+    <select id="labelFilter"><option value="">All</option></select>
+    <span id="syncStatus"></span>
   </div>
 
-  <div class="setup" id="setupPanel" style="display:none;">
-    <h3>Connect Google Drive</h3>
-    <p id="setupText">Paste the OAuth Client ID you created in Google Cloud Console, then sign in. This is done once per device.</p>
-    <input id="clientIdInput" placeholder="xxxxxxxxxx.apps.googleusercontent.com" />
-    <button id="saveClientIdBtn">Save and continue</button>
+  <main id="taskList" class="task-list"></main>
+
+  <div class="input-bar">
+    <input id="textInput" type="text" placeholder="Add a task or tap mic…" autocomplete="off">
+    <button id="micBtn" class="mic-btn" aria-label="Voice input">&#127908;</button>
   </div>
+</div>
 
-  <div class="filterrow" id="filterRow" style="display:none;">
-    <span>Filter:</span>
-    <select id="labelFilterSelect"><option value="">All tasks</option></select>
+<div id="overlay" class="overlay"></div>
+<div id="sidePanel" class="side-panel">
+  <div class="panel-header">
+    <h2>Menu</h2>
+    <button id="closeMenuBtn" class="icon-round-btn">&times;</button>
   </div>
-
-  <div id="mainTasks"></div>
+  <div class="menu-nav">
+    <button data-section="search" class="active">Search</button>
+    <button data-section="completed">Completed</button>
+    <button data-section="deleted">Deleted</button>
+    <button data-section="labels">Manage labels</button>
+    <button data-section="sync">Drive sync</button>
+  </div>
+  <div class="menu-body" id="menuBody"></div>
 </div>
 
-<div class="menu-overlay" id="menuOverlay">
-  <div class="menu-sheet" id="menuSheet"></div>
+<div id="sheetOverlay" class="sheet-overlay">
+  <div class="sheet">
+    <h3 id="sheetTitle"></h3>
+    <div id="sheetBody"></div>
+  </div>
 </div>
 
-<div class="picker-overlay" id="pickerOverlay">
-  <div class="picker-sheet" id="pickerSheet"></div>
+<div id="setupOverlay" class="setup-overlay">
+  <div class="setup-box">
+    <button class="close-x" id="setupCloseBtn">&times;</button>
+    <h2>Google Drive Sync Setup</h2>
+    <p style="font-size:13.5px;color:var(--ink-soft)">One-time per device. Paste the OAuth Client ID you created in Google Cloud Console.</p>
+    <label for="setupClientIdInput">OAuth Client ID</label>
+    <input id="setupClientIdInput" type="text" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+    <div class="row">
+      <button id="setupSaveBtn" class="btn-primary">Save Client ID</button>
+    </div>
+    <label>This exact URL must be added to BOTH "Authorized JavaScript origins" (without the trailing path) AND "Authorized redirect URIs" (full, with trailing slash) in your Google Cloud OAuth Client:</label>
+    <div class="row">
+      <div class="uri-box" id="setupRedirectUri"></div>
+      <button id="setupCopyBtn" class="btn-secondary">Copy</button>
+    </div>
+    <div class="row" style="margin-top:14px;">
+      <button id="setupSignInBtn" class="btn-primary">Sign in with Google</button>
+      <button id="setupSyncNowBtn" class="btn-secondary">Sync now</button>
+      <button id="setupDisconnectBtn" class="btn-secondary">Disconnect</button>
+    </div>
+    <div class="status-line" id="setupStatusLine"></div>
+  </div>
 </div>
 
-<div class="voice-status" id="voiceStatus"></div>
-<div class="toast" id="toast"></div>
-
-<div class="dock">
-  <input class="textadd" id="textAdd" placeholder="Type a main task, or tap the mic">
-  <button class="mic" id="micBtn" aria-label="Add task by voice">🎤</button>
-</div>
+<div id="toastContainer"></div>
 
 <script>
 (function(){
-  var GDRIVE_FILE_NAME = "diary-todo-sync.json";
-  var GDRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
-  var state = { date: todayStr(), data: null, activeTarget: null, filterLabel: "" };
-  var knownLabels = [];
-  var reminderTimers = {};
-  var drive = { clientId:null, accessToken:null, fileId:null, signedIn:false };
-  var blob = null;
-  var pushTimer = null;
-  var dirty = false;
-  var driveOpQueue = Promise.resolve();
-  function queueDriveOp(fn){
-    driveOpQueue = driveOpQueue.then(fn, fn);
-    return driveOpQueue;
-  }
+"use strict";
 
-  function todayStr(){ var d = new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
-  function pad(n){ return n<10 ? "0"+n : ""+n; }
-  function uid(){ return Math.random().toString(36).slice(2,9); }
+/* ================= storage keys ================= */
+var K = {
+  blob: 'diaryTodo.blob.v1',
+  clientId: 'diaryTodo.gClientId',
+  accessToken: 'diaryTodo.gToken',
+  tokenExpiry: 'diaryTodo.gTokenExpiry',
+  driveFileId: 'diaryTodo.gFileId'
+};
+var DRIVE_FILE_NAME = 'diary-todo-sync.json';
 
-  function loadLocalCache(){
-    try{ var raw = localStorage.getItem("gdrive_blob_cache"); if(raw) return JSON.parse(raw); }catch(e){}
-    return { updatedAt:0, kv:{} };
-  }
-  function saveLocalCache(b){ try{ localStorage.setItem("gdrive_blob_cache", JSON.stringify(b)); }catch(e){} }
+/* ================= date helpers ================= */
+function pad2(n){ return String(n).padStart(2,'0'); }
+function dateKey(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function parseDateKey(k){ var p=k.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function addDays(d,n){ var nd=new Date(d); nd.setDate(nd.getDate()+n); return nd; }
+function startOfToday(){ var d=new Date(); d.setHours(0,0,0,0); return d; }
 
-  async function storageGet(key){
-    if(!blob) blob = loadLocalCache();
-    return blob.kv[key] || null;
-  }
-  async function storageSet(key, value){
-    if(!blob) blob = loadLocalCache();
-    blob.kv[key] = value;
-    blob.updatedAt = Date.now();
-    dirty = true;
-    saveLocalCache(blob);
-    schedulePush();
-  }
-  function schedulePush(){
-    if(!drive.signedIn) return;
-    clearTimeout(pushTimer);
-    pushTimer = setTimeout(function(){ queueDriveOp(pushToDrive); }, 350);
-  }
-  function flushPushNow(){
-    if(!drive.signedIn) return;
-    clearTimeout(pushTimer);
-    queueDriveOp(pushToDrive);
-  }
+/* ================= id / escape ================= */
+function genId(){ return 'id_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8); }
+function escapeHtml(s){ return String(s==null?'':s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function escapeAttr(s){ return escapeHtml(s); }
 
-  function normalizeDayData(parsed){
-    if(!parsed) return null;
-    if(Array.isArray(parsed.tasks)){
-      parsed.tasks.forEach(function(t){ if(!t.originId) t.originId = t.id; });
-      return parsed;
-    }
-    if(Array.isArray(parsed.categories)){
-      var migrated = [];
-      parsed.categories.forEach(function(cat){
-        (cat.tasks||[]).forEach(function(t){
-          var newId = t.id || uid();
-          migrated.push({
-            id: newId,
-            originId: t.originId || newId,
-            text: t.text,
-            done: !!t.done,
-            label: t.label || "",
-            priority: (typeof t.priority === "number") ? t.priority : null,
-            reminderTime: null,
-            moveHistory: t.moveHistory || [],
-            subtasks: (t.subtasks||[]).map(function(st){ return {id: st.id || uid(), text: st.text, done: !!st.done, priority: (typeof st.priority === "number") ? st.priority : null}; })
-          });
-        });
-      });
-      return { tasks: migrated };
-    }
-    return { tasks: [] };
-  }
+/* ================= state ================= */
+var currentDate = startOfToday();
+var blob = loadBlobFromCache();
+var dirty = false;
+var needsReauth = false;
+var currentLabelFilter = '';
+var openTinyAddFor = null;
+var firedReminders = new Set();
+var pushTimer = null;
+var syncQueue = Promise.resolve();
 
-  async function getDeletedOriginIdsForDate(dateStr){
-    var list = await loadDeletedHistory();
-    var set = {};
-    list.forEach(function(entry){
-      if(entry.fromDate === dateStr && entry.originId){ set[entry.originId] = true; }
-    });
-    return set;
-  }
+function loadBlobFromCache(){
+  try{
+    var raw = localStorage.getItem(K.blob);
+    if (raw){ var parsed = JSON.parse(raw); if (parsed && typeof parsed==='object' && parsed.data) return parsed; }
+  }catch(e){}
+  return { updatedAt: 0, data: {} };
+}
+function persistLocalCache(){
+  try{ localStorage.setItem(K.blob, JSON.stringify(blob)); }catch(e){}
+}
+function markDirty(){
+  dirty = true;
+  blob.updatedAt = Date.now();
+  persistLocalCache();
+  clearTimeout(pushTimer);
+  pushTimer = setTimeout(function(){ pushNow(); }, 380);
+}
 
-  async function loadDay(dateStr){
-    var raw = await storageGet("diary:"+dateStr);
-    var current = { tasks: [] };
-    if(raw){
-      try{ current = normalizeDayData(JSON.parse(raw)); }catch(e){ current = { tasks: [] }; }
-    }
-    var prior = await findMostRecentPriorDay(dateStr, 30);
-    if(prior && prior.tasks){
-      var existingOriginIds = {};
-      current.tasks.forEach(function(t){ existingOriginIds[t.originId || t.id] = true; });
-      var excluded = await getDeletedOriginIdsForDate(dateStr);
-      prior.tasks.forEach(function(t){
-        var oid = t.originId || t.id;
-        if(!t.done && !existingOriginIds[oid] && !excluded[oid]){
-          current.tasks.push({
-            id: uid(), originId: oid, text: t.text, done:false, label: t.label || "",
-            priority: (typeof t.priority === "number") ? t.priority : null,
-            reminderTime: null,
-            moveHistory: t.moveHistory || [],
-            subtasks: (t.subtasks||[]).map(function(st){ return {id:uid(), text:st.text, done:st.done, priority: (typeof st.priority === "number") ? st.priority : null}; })
-          });
-          existingOriginIds[oid] = true;
-        }
-      });
-    }
-    return current;
-  }
-  async function propagateDoneForward(originId, fromDateStr){
-    var d = parseDate(fromDateStr);
-    for(var i=1; i<=60; i++){
-      var next = new Date(d.getTime());
-      next.setDate(next.getDate()+i);
-      var nextStr = next.getFullYear()+"-"+pad(next.getMonth()+1)+"-"+pad(next.getDate());
-      var raw = await storageGet("diary:"+nextStr);
-      if(!raw) continue;
-      try{
-        var data = normalizeDayData(JSON.parse(raw));
-        var changed = false;
-        data.tasks.forEach(function(t){
-          if((t.originId||t.id) === originId && !t.done){ t.done = true; changed = true; }
-        });
-        if(changed) await saveDay(nextStr, data);
-      }catch(e){}
-    }
-  }
-  async function saveDay(dateStr, data){ await storageSet("diary:"+dateStr, JSON.stringify(data)); }
-  async function loadKnownLabels(){
-    var raw = await storageGet("labels:list");
-    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
-    return [];
-  }
-  async function saveKnownLabels(list){ await storageSet("labels:list", JSON.stringify(list)); }
-  async function registerLabel(name){
-    if(!name) return;
-    if(knownLabels.indexOf(name) === -1){
-      knownLabels.push(name);
-      await saveKnownLabels(knownLabels);
-      populateFilterOptions();
-    }
-  }
-  function populateFilterOptions(){
-    var sel = document.getElementById("labelFilterSelect");
-    var current = sel.value;
-    sel.innerHTML = '<option value="">All tasks</option>';
-    knownLabels.forEach(function(l){
-      var o = document.createElement("option"); o.value = l; o.textContent = l;
-      sel.appendChild(o);
-    });
-    if(knownLabels.indexOf(current) !== -1 || current === "") sel.value = current;
-    else { sel.value = ""; state.filterLabel = ""; }
-    document.getElementById("filterRow").style.display = knownLabels.length ? "flex" : "none";
-  }
-
-  async function loadDeletedHistory(){
-    var raw = await storageGet("history:deleted");
-    if(raw){ try{ return JSON.parse(raw); }catch(e){} }
-    return [];
-  }
-  async function saveDeletedHistory(list){
-    if(list.length > 300) list = list.slice(list.length - 300);
-    await storageSet("history:deleted", JSON.stringify(list));
-  }
-  async function recordDeletion(task, fromDateStr){
-    var list = await loadDeletedHistory();
-    list.push({
-      text: task.text, label: task.label || "", subtasks: (task.subtasks||[]).map(function(s){return s.text;}),
-      fromDate: fromDateStr, deletedAt: Date.now(), originId: task.originId || task.id
-    });
-    await saveDeletedHistory(list);
-  }
-
-  function getAllDayEntries(){
-    if(!blob) blob = loadLocalCache();
-    var entries = [];
-    Object.keys(blob.kv).forEach(function(key){
-      var m = key.match(/^diary:(\d{4}-\d{2}-\d{2})$/);
-      if(!m) return;
-      try{
-        var data = normalizeDayData(JSON.parse(blob.kv[key]));
-        entries.push({ dateStr: m[1], data: data });
-      }catch(e){}
-    });
-    entries.sort(function(a,b){ return a.dateStr < b.dateStr ? 1 : -1; });
-    return entries;
-  }
-
-  async function renameLabelEverywhere(oldName, newName){
-    var entries = getAllDayEntries();
-    for(var i=0;i<entries.length;i++){
-      var changed = false;
-      entries[i].data.tasks.forEach(function(t){
-        if(t.label === oldName){ t.label = newName; changed = true; }
-      });
-      if(changed) await saveDay(entries[i].dateStr, entries[i].data);
-    }
-    var idx = knownLabels.indexOf(oldName);
-    if(idx>-1){ knownLabels[idx] = newName; await saveKnownLabels(knownLabels); }
-    if(state.data){
-      state.data.tasks.forEach(function(t){ if(t.label === oldName) t.label = newName; });
-    }
-  }
-  async function deleteLabelEverywhere(name){
-    var entries = getAllDayEntries();
-    for(var i=0;i<entries.length;i++){
-      var changed = false;
-      entries[i].data.tasks.forEach(function(t){
-        if(t.label === name){ t.label = ""; changed = true; }
-      });
-      if(changed) await saveDay(entries[i].dateStr, entries[i].data);
-    }
-    var idx = knownLabels.indexOf(name);
-    if(idx>-1){ knownLabels.splice(idx,1); await saveKnownLabels(knownLabels); }
-    if(state.data){
-      state.data.tasks.forEach(function(t){ if(t.label === name) t.label = ""; });
-    }
-  }
-
-  async function findMostRecentPriorDay(dateStr, maxLookback){
-    var d = parseDate(dateStr);
-    for(var i=1; i<=maxLookback; i++){
-      var prev = new Date(d.getTime());
-      prev.setDate(prev.getDate()-i);
-      var prevStr = prev.getFullYear()+"-"+pad(prev.getMonth()+1)+"-"+pad(prev.getDate());
-      var raw = await storageGet("diary:"+prevStr);
-      if(raw){ try{ return normalizeDayData(JSON.parse(raw)); }catch(e){} }
-    }
-    return null;
-  }
-
-  function setSyncStatus(text, actionLabel, actionFn){
-    document.getElementById("syncStatus").textContent = text;
-    var btn = document.getElementById("syncActionBtn");
-    if(actionLabel){ btn.style.display="inline-block"; btn.textContent = actionLabel; btn.onclick = actionFn; }
-    else { btn.style.display="none"; }
-  }
-  function showSetupPanel(text){
-    document.getElementById("setupPanel").style.display = "block";
-    if(text) document.getElementById("setupText").textContent = text;
-  }
-  function hideSetupPanel(){ document.getElementById("setupPanel").style.display = "none"; }
-
-  function saveStoredToken(token, expiresInSeconds){
-    try{
-      var expiresAt = Date.now() + (parseInt(expiresInSeconds||"3600",10) * 1000);
-      localStorage.setItem("gdrive_token", JSON.stringify({ token: token, expiresAt: expiresAt }));
-    }catch(e){}
-  }
-  function loadStoredToken(){
-    try{
-      var raw = localStorage.getItem("gdrive_token");
-      if(!raw) return null;
-      var obj = JSON.parse(raw);
-      if(obj && obj.token && obj.expiresAt && (obj.expiresAt - Date.now() > 60000)){ return obj.token; }
-    }catch(e){}
-    return null;
-  }
-  function clearStoredToken(){ try{ localStorage.removeItem("gdrive_token"); }catch(e){} }
-
-  var authExpiredHandled = false;
-
-  async function driveFetch(url, opts){
-    opts = opts || {};
-    opts.headers = opts.headers || {};
-    opts.headers["Authorization"] = "Bearer " + drive.accessToken;
-    var res = await fetch(url, opts);
-    if(res.status === 401){
-      clearStoredToken();
-      drive.signedIn = false; drive.accessToken = null;
-      authExpiredHandled = true;
-      setSyncStatus("Signed out (session expired)", "Sign in with Google", function(){
-        setSyncStatus("Opening Google sign-in…");
-        connectDrive(false);
-      });
-      throw new Error("Drive API 401: token expired or revoked");
-    }
-    if(!res.ok){ var t = await res.text(); throw new Error("Drive API "+res.status+": "+t); }
-    return res;
-  }
-
-  async function findOrCreateDriveFile(){
-    var q = encodeURIComponent("name='"+GDRIVE_FILE_NAME+"' and trashed=false");
-    var res = await driveFetch("https://www.googleapis.com/drive/v3/files?q="+q+"&fields=files(id,name)&spaces=drive");
-    var json = await res.json();
-    if(json.files && json.files.length){ return json.files[0].id; }
-    var metadata = { name: GDRIVE_FILE_NAME, mimeType: "application/json" };
-    var boundary = "-------diarytodo" + Date.now();
-    var body =
-      "--"+boundary+"\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n"+JSON.stringify(metadata)+"\r\n"+
-      "--"+boundary+"\r\nContent-Type: application/json\r\n\r\n"+JSON.stringify({updatedAt:0, kv:{}})+"\r\n"+
-      "--"+boundary+"--";
-    var createRes = await driveFetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id", {
-      method:"POST", headers:{ "Content-Type":"multipart/related; boundary="+boundary }, body: body
-    });
-    var createJson = await createRes.json();
-    return createJson.id;
-  }
-
-  async function pullFromDrive(){
-    if(dirty){
-      // A local change hasn't been pushed yet — never let an incoming pull clobber it.
-      // Push what we have instead of pulling over it.
-      await pushToDrive();
-      return;
-    }
-    var res = await driveFetch("https://www.googleapis.com/drive/v3/files/"+drive.fileId+"?alt=media");
-    var remote = await res.json();
-    var local = blob || loadLocalCache();
-    if((remote.updatedAt||0) >= (local.updatedAt||0)){
-      blob = remote;
-      saveLocalCache(blob);
-    } else {
-      // Local has changes Drive doesn't have yet (e.g. saved locally while signed out) — push them now.
-      blob = local;
-      saveLocalCache(blob);
-      dirty = true;
-      await pushToDrive();
-    }
-  }
-  async function pushToDrive(){
-    if(!drive.signedIn || !drive.fileId || !blob) return;
-    var wasDirty = dirty;
-    authExpiredHandled = false;
-    try{
-      await driveFetch("https://www.googleapis.com/upload/drive/v3/files/"+drive.fileId+"?uploadType=media", {
-        method:"PATCH", headers:{ "Content-Type":"application/json" }, body: JSON.stringify(blob)
-      });
-      if(wasDirty) dirty = false;
-      setSyncStatus("Synced just now via Google Drive");
-    }catch(e){
-      if(!authExpiredHandled){
-        setSyncStatus("Couldn't reach Drive — saved on this device");
-      }
-    }
-  }
-
-  async function connectDrive(silent){
-    if(silent) return false;
-    var redirectUri = window.location.origin + window.location.pathname;
-    var params = new URLSearchParams({
-      client_id: drive.clientId, redirect_uri: redirectUri, response_type: "token",
-      scope: GDRIVE_SCOPE, include_granted_scopes: "true", prompt: "consent"
-    });
-    window.location.href = "https://accounts.google.com/o/oauth2/v2/auth?" + params.toString();
-    return new Promise(function(){});
-  }
-
-  function parseTokenFromHash(){
-    if(location.hash && location.hash.indexOf("access_token") !== -1){
-      var params = new URLSearchParams(location.hash.substring(1));
-      var token = params.get("access_token");
-      var expiresIn = params.get("expires_in");
-      history.replaceState(null, "", location.pathname + location.search);
-      if(token){
-        drive.accessToken = token; drive.signedIn = true;
-        saveStoredToken(token, expiresIn);
-        return true;
-      }
-    }
-    if(location.hash && location.hash.indexOf("error=") !== -1){
-      history.replaceState(null, "", location.pathname + location.search);
-      showToast("Google sign-in was cancelled");
-    }
-    return false;
-  }
-
-  async function initDriveSync(){
-    var savedId = null;
-    try{ savedId = localStorage.getItem("gdrive_client_id"); }catch(e){}
-    if(!savedId){ showSetupPanel(); setSyncStatus("Not connected to Drive"); return; }
-    drive.clientId = savedId;
-    if(parseTokenFromHash()){ await finishDriveConnect(); return; }
-    var stored = loadStoredToken();
-    if(stored){ drive.accessToken = stored; drive.signedIn = true; await finishDriveConnect(); return; }
-    function offerSignIn(){
-      setSyncStatus("Not signed in", "Sign in with Google", function(){
-        setSyncStatus("Opening Google sign-in…");
-        connectDrive(false);
-      });
-    }
-    offerSignIn();
-  }
-
-  async function finishDriveConnect(){
-    hideSetupPanel();
-    setSyncStatus("Syncing…");
-    authExpiredHandled = false;
-    try{
-      drive.fileId = await findOrCreateDriveFile();
-      await queueDriveOp(pullFromDrive);
-      setSyncStatus("Synced via Google Drive", "Refresh", async function(){
-        setSyncStatus("Refreshing…");
-        await queueDriveOp(pullFromDrive);
-        await loadAndRender();
-        setSyncStatus("Synced via Google Drive");
-      });
-      await loadAndRender();
-    }catch(e){
-      if(!authExpiredHandled){
-        setSyncStatus("Drive error — using local copy", "Try again", function(){
-          finishDriveConnect();
-        });
-      }
-    }
-  }
-
-  document.getElementById("saveClientIdBtn").addEventListener("click", async function(){
-    var val = document.getElementById("clientIdInput").value.trim();
-    if(!val){ return; }
-    try{ localStorage.setItem("gdrive_client_id", val); }catch(e){}
-    await initDriveSync();
+/* ================= day / data access ================= */
+function dayKeyOf(k){ return 'diary:'+k; }
+function getDayMutable(key){
+  var dk = dayKeyOf(key);
+  if (!blob.data[dk]) blob.data[dk] = { mainTasks: [] };
+  return blob.data[dk];
+}
+function allDiaryKeys(){
+  return Object.keys(blob.data).filter(function(k){ return k.indexOf('diary:')===0; }).map(function(k){ return k.slice(6); });
+}
+function computeRolloverDay(key){
+  var target = parseDateKey(key);
+  var bestKey=null, bestDate=null;
+  allDiaryKeys().forEach(function(k){
+    var d = parseDateKey(k);
+    if (d < target && (!bestDate || d > bestDate)) { bestDate=d; bestKey=k; }
   });
-
-  document.addEventListener("visibilitychange", function(){
-    if(document.visibilityState === "visible" && drive.signedIn && drive.fileId){
-      queueDriveOp(pullFromDrive).then(loadAndRender);
-    } else if(document.visibilityState === "hidden"){
-      flushPushNow();
+  if (!bestKey) return null;
+  var src = blob.data[dayKeyOf(bestKey)];
+  var carried = [];
+  src.mainTasks.forEach(function(t){
+    if (!t.done){
+      carried.push({
+        id: genId(),
+        text: t.text,
+        done: false,
+        label: t.label || null,
+        priority: (t.priority===undefined?null:t.priority),
+        reminderTime: null,
+        tinyTasks: (t.tinyTasks||[]).map(function(tt){ return { id: genId(), text: tt.text, done: tt.done, priority: (tt.priority===undefined?null:tt.priority) }; }),
+        moveHistory: (t.moveHistory||[]).slice()
+      });
     }
   });
-  window.addEventListener("pagehide", function(){ flushPushNow(); });
-
-  function renderDateHeader(){
-    var d = parseDate(state.date);
-    var months = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
-    var weekdays = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-    document.getElementById("mon").textContent = months[d.getMonth()];
-    document.getElementById("day").textContent = d.getDate();
-    document.getElementById("weekday").textContent = weekdays[d.getDay()];
-    document.getElementById("year").textContent = d.getFullYear();
-  }
-  function parseDate(s){ var p = s.split("-"); return new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])); }
-  function shiftDay(delta){
-    var d = parseDate(state.date); d.setDate(d.getDate()+delta);
-    state.date = d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
-    loadAndRender();
-  }
-
-  async function loadAndRender(){
-    state.data = await loadDay(state.date);
-    renderDateHeader();
-    renderMainTasks();
-  }
-
-  function pickLabel(currentLabel, onPicked){
-    var overlay = document.getElementById("pickerOverlay");
-    var sheet = document.getElementById("pickerSheet");
-    sheet.innerHTML = "";
-    var title = document.createElement("div"); title.className = "picker-title"; title.textContent = "Choose a label";
-    sheet.appendChild(title);
-
-    var noneBtn = document.createElement("button"); noneBtn.className = "picker-option"; noneBtn.textContent = "No label";
-    noneBtn.addEventListener("click", function(){ overlay.classList.remove("open"); onPicked(""); });
-    sheet.appendChild(noneBtn);
-
-    knownLabels.forEach(function(l){
-      var b = document.createElement("button"); b.className = "picker-option"; b.textContent = l + (l === currentLabel ? "  ✓" : "");
-      b.addEventListener("click", function(){ overlay.classList.remove("open"); onPicked(l); });
-      sheet.appendChild(b);
-    });
-
-    var newBtn = document.createElement("button"); newBtn.className = "picker-option new"; newBtn.textContent = "+ New label…";
-    newBtn.addEventListener("click", function(){
-      overlay.classList.remove("open");
-      var val = prompt("New label name:");
-      if(val !== null && val.trim()){ onPicked(val.trim()); }
-    });
-    sheet.appendChild(newBtn);
-
-    var cancel = document.createElement("button"); cancel.className = "picker-cancel"; cancel.textContent = "Cancel";
-    cancel.addEventListener("click", function(){ overlay.classList.remove("open"); });
-    sheet.appendChild(cancel);
-
-    overlay.classList.add("open");
-  }
-  function pickPriority(current, onPicked){
-    var val = prompt("Priority number (1 = highest, blank to remove):", current != null ? String(current) : "");
-    if(val === null) return;
-    val = val.trim();
-    if(val === ""){ onPicked(null); return; }
-    var n = parseInt(val, 10);
-    if(!isNaN(n)) onPicked(n);
-  }
-  function pickReminder(current, onPicked){
-    var val = prompt("Reminder time today, 24hr HH:MM (e.g. 15:30). Blank to remove:", current || "");
-    if(val === null) return;
-    val = val.trim();
-    if(val === ""){ onPicked(null); return; }
-    if(/^([01]\d|2[0-3]):([0-5]\d)$/.test(val)) onPicked(val);
-    else showToast("Use 24hr HH:MM, e.g. 09:05 or 15:30");
-  }
-
-  function openDatePicker(currentDateStr, onPicked){
-    var input = document.createElement("input");
-    input.type = "date";
-    input.value = currentDateStr;
-    input.style.position = "fixed";
-    input.style.left = "-9999px";
-    document.body.appendChild(input);
-    var done = false;
-    function cleanup(){ if(input.parentNode) input.parentNode.removeChild(input); }
-    input.addEventListener("change", function(){
-      done = true;
-      onPicked(input.value);
-      cleanup();
-    });
-    input.addEventListener("blur", function(){
-      setTimeout(function(){ if(!done) cleanup(); }, 300);
-    });
-    if(input.showPicker){ try{ input.showPicker(); }catch(e){ input.click(); } }
-    else { input.click(); }
-  }
-
-  async function moveMainTaskToDate(task, fromDateStr, toDateStr){
-    if(!task.moveHistory) task.moveHistory = [];
-    task.moveHistory.push({ from: fromDateStr, to: toDateStr, at: Date.now() });
-
-    state.data.tasks = state.data.tasks.filter(function(x){ return x.id !== task.id; });
-    await persist();
-
-    var targetData = await loadDay(toDateStr);
-    targetData.tasks.push(task);
-    await saveDay(toDateStr, targetData);
-
-    if(state.activeTarget === task.id) state.activeTarget = null;
-    renderMainTasks();
-    showToast('Moved "'+task.text+'" to '+formatDateForToast(toDateStr));
-  }
-
-  function formatDateForToast(dateStr){
-    var d = parseDate(dateStr);
-    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return months[d.getMonth()]+" "+d.getDate()+", "+d.getFullYear();
-  }
-
-  function showMoveHistory(task){
-    var lines = task.moveHistory.map(function(m){
-      var when = new Date(m.at);
-      var whenStr = when.toLocaleDateString() + " " + when.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      return formatDateForToast(m.from) + "  →  " + formatDateForToast(m.to) + "   (moved " + whenStr + ")";
-    });
-    alert('Move history for "'+task.text+'":\n\n' + lines.join("\n"));
-  }
-
-  function renderMainTasks(){
-    var wrap = document.getElementById("mainTasks");
-    wrap.innerHTML = "";
-    var visible = state.data.tasks.filter(function(t){
-      return !state.filterLabel || t.label === state.filterLabel;
-    });
-    if(!visible.length){
-      var hint = document.createElement("div"); hint.className = "empty-hint";
-      hint.textContent = state.data.tasks.length ? "No tasks with this label" : "No tasks yet — type one below or tap the mic";
-      wrap.appendChild(hint);
-      clearAllReminderTimers();
-      scheduleAllReminders();
-      return;
+  if (carried.length===0) return null;
+  return { mainTasks: carried };
+}
+/* Rollover only applies when opening the REAL today's date for the first time. */
+function getOrCreateDayForView(key){
+  var dk = dayKeyOf(key);
+  if (blob.data[dk]) return blob.data[dk];
+  if (key === dateKey(new Date())){
+    var rolled = computeRolloverDay(key);
+    if (rolled){
+      blob.data[dk] = rolled;
+      markDirty();
+      return rolled;
     }
-    var sorted = visible.slice().sort(function(a,b){
-      var ap = (a.priority==null) ? Infinity : a.priority;
-      var bp = (b.priority==null) ? Infinity : b.priority;
-      return ap - bp;
-    });
-    sorted.forEach(function(t){
-      if(!t.subtasks) t.subtasks = [];
-      var isTargeted = state.activeTarget === t.id;
-      var box = document.createElement("div");
-      box.className = "maintask" + (t.done? " done":"") + (isTargeted? " targeted":"");
-
-      var row = document.createElement("div"); row.className = "mt-row";
-      var bullet = document.createElement("div"); bullet.className = "bullet";
-      bullet.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
-      bullet.addEventListener("click", function(){
-        t.done = !t.done;
-        persist(); renderMainTasks();
-        if(t.done){ propagateDoneForward(t.originId || t.id, state.date); }
-      });
-
-      var txtWrap = document.createElement("div"); txtWrap.className = "mt-text-wrap";
-      var badges = document.createElement("div"); badges.className = "mt-badges";
-      if(t.priority != null){
-        var pbadge = document.createElement("span"); pbadge.className = "mt-priority"; pbadge.textContent = "P"+t.priority; pbadge.title = "Tap to change priority";
-        pbadge.addEventListener("click", function(){ pickPriority(t.priority, function(v){ t.priority=v; persist(); renderMainTasks(); }); });
-        badges.appendChild(pbadge);
-      }
-      if(t.label){
-        var pill = document.createElement("span"); pill.className = "mt-label"; pill.textContent = t.label; pill.title = "Tap to edit label";
-        pill.addEventListener("click", function(){
-          pickLabel(t.label, async function(v){ t.label = v; await registerLabel(v); persist(); renderMainTasks(); });
-        });
-        badges.appendChild(pill);
-      }
-      if(t.reminderTime){
-        var rbadge = document.createElement("span"); rbadge.className = "mt-reminder"; rbadge.textContent = "⏰ "+t.reminderTime; rbadge.title = "Tap to change reminder";
-        rbadge.addEventListener("click", function(){ pickReminder(t.reminderTime, function(v){ t.reminderTime=v; persist(); renderMainTasks(); }); });
-        badges.appendChild(rbadge);
-      }
-      if(badges.childNodes.length) txtWrap.appendChild(badges);
-
-      var txt = document.createElement("div"); txt.className = "mt-text"; txt.contentEditable = "true"; txt.spellcheck = false; txt.textContent = t.text;
-      txt.addEventListener("blur", function(){
-        var v = txt.textContent.trim(); t.text = v || t.text; txt.textContent = t.text; persist();
-      });
-      txt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); txt.blur(); } });
-      txtWrap.appendChild(txt);
-
-      var prioBtn = document.createElement("button"); prioBtn.className = "mt-prio-toggle"; prioBtn.title = "Set priority"; prioBtn.textContent = "🔢";
-      prioBtn.addEventListener("click", function(){ pickPriority(t.priority, function(v){ t.priority=v; persist(); renderMainTasks(); }); });
-      var labelBtn = document.createElement("button"); labelBtn.className = "mt-label-toggle"; labelBtn.title = "Add label"; labelBtn.textContent = "🏷";
-      labelBtn.addEventListener("click", function(){
-        pickLabel(t.label, async function(v){ t.label = v; await registerLabel(v); persist(); renderMainTasks(); });
-      });
-      var remindBtn = document.createElement("button"); remindBtn.className = "mt-remind-toggle"; remindBtn.title = "Set reminder"; remindBtn.textContent = "⏰";
-      remindBtn.addEventListener("click", function(){ pickReminder(t.reminderTime, function(v){ t.reminderTime=v; persist(); renderMainTasks(); }); });
-      var dateBtn = document.createElement("button"); dateBtn.className = "mt-date-toggle"; dateBtn.title = "Move to another date"; dateBtn.textContent = "📅";
-      dateBtn.addEventListener("click", function(){
-        openDatePicker(state.date, function(newDateStr){
-          if(newDateStr && newDateStr !== state.date){ moveMainTaskToDate(t, state.date, newDateStr); }
-        });
-      });
-      var historyBtn = null;
-      if(t.moveHistory && t.moveHistory.length){
-        historyBtn = document.createElement("button"); historyBtn.className = "mt-history-toggle"; historyBtn.title = "View move history";
-        historyBtn.textContent = "🕘";
-        var countSpan = document.createElement("span"); countSpan.className = "count"; countSpan.textContent = t.moveHistory.length;
-        historyBtn.appendChild(countSpan);
-        historyBtn.addEventListener("click", function(){ showMoveHistory(t); });
-      }
-      var subToggle = document.createElement("button"); subToggle.className = "mt-sub-toggle"; subToggle.title = "Add tiny task"; subToggle.textContent = "+";
-      subToggle.addEventListener("click", function(){
-        state.activeTarget = isTargeted ? null : t.id;
-        renderMainTasks();
-      });
-      var del = document.createElement("button"); del.className = "mt-del"; del.textContent = "✕";
-      del.addEventListener("click", function(){
-        recordDeletion(t, state.date);
-        state.data.tasks = state.data.tasks.filter(function(x){return x.id!==t.id;});
-        if(isTargeted) state.activeTarget = null;
-        persist(); renderMainTasks();
-      });
-      row.appendChild(bullet); row.appendChild(txtWrap); row.appendChild(prioBtn); row.appendChild(labelBtn); row.appendChild(remindBtn); row.appendChild(dateBtn);
-      if(historyBtn) row.appendChild(historyBtn);
-      row.appendChild(subToggle); row.appendChild(del);
-      box.appendChild(row);
-
-      if(t.subtasks.length){
-        var sortedSub = t.subtasks.slice().sort(function(a,b){
-          var ap = (a.priority==null) ? Infinity : a.priority;
-          var bp = (b.priority==null) ? Infinity : b.priority;
-          return ap - bp;
-        });
-        var ul = document.createElement("ul"); ul.className = "tinytasks";
-        sortedSub.forEach(function(st){
-          var li = document.createElement("li"); li.className = "tinytask" + (st.done? " done":"");
-          var sb = document.createElement("div"); sb.className = "tt-bullet";
-          sb.innerHTML = '<svg viewBox="0 0 24 24"><polyline points="4,13 9,18 20,6"/></svg>';
-          sb.addEventListener("click", function(){ st.done = !st.done; persist(); renderMainTasks(); });
-          if(st.priority != null){
-            var stp = document.createElement("span"); stp.className = "tt-priority"; stp.textContent = "P"+st.priority; stp.title = "Tap to change priority";
-            stp.addEventListener("click", function(){ pickPriority(st.priority, function(v){ st.priority=v; persist(); renderMainTasks(); }); });
-            li.appendChild(stp);
-          }
-          var stxt = document.createElement("div"); stxt.className = "tt-text"; stxt.contentEditable = "true"; stxt.spellcheck = false; stxt.textContent = st.text;
-          stxt.addEventListener("blur", function(){ var v = stxt.textContent.trim(); st.text = v || st.text; stxt.textContent = st.text; persist(); });
-          stxt.addEventListener("keydown", function(e){ if(e.key === "Enter"){ e.preventDefault(); stxt.blur(); } });
-          var stPrioBtn = document.createElement("button"); stPrioBtn.className = "tt-prio-toggle"; stPrioBtn.title = "Set priority"; stPrioBtn.textContent = "🔢";
-          stPrioBtn.addEventListener("click", function(){ pickPriority(st.priority, function(v){ st.priority=v; persist(); renderMainTasks(); }); });
-          var sdel = document.createElement("button"); sdel.className = "tt-del"; sdel.textContent = "✕";
-          sdel.addEventListener("click", function(){
-            t.subtasks = t.subtasks.filter(function(x){return x.id!==st.id;});
-            persist(); renderMainTasks();
-          });
-          li.appendChild(sb); li.appendChild(stxt); li.appendChild(stPrioBtn); li.appendChild(sdel);
-          ul.appendChild(li);
-        });
-        box.appendChild(ul);
-      }
-
-      if(isTargeted){
-        var addRow = document.createElement("div"); addRow.className = "tt-add-row";
-        var addInput = document.createElement("input");
-        addInput.placeholder = "Type a tiny task, or speak it"; addInput.autofocus = true;
-        addInput.addEventListener("keydown", function(e){
-          if(e.key==="Enter"){ var v = e.target.value.trim(); if(v){ addTinyTask(t, v); e.target.value=""; } }
-        });
-        var hintEl = document.createElement("span"); hintEl.className = "hint"; hintEl.textContent = "mic adds here";
-        addRow.appendChild(addInput); addRow.appendChild(hintEl);
-        box.appendChild(addRow);
-      }
-
-      wrap.appendChild(box);
-    });
-    clearAllReminderTimers();
-    scheduleAllReminders();
   }
-
-  function clearAllReminderTimers(){
-    Object.keys(reminderTimers).forEach(function(id){ clearTimeout(reminderTimers[id]); });
-    reminderTimers = {};
-  }
-  function scheduleAllReminders(){
-    if(state.date !== todayStr()) return;
-    if(!state.data || !state.data.tasks) return;
-    state.data.tasks.forEach(function(t){
-      if(t.done || !t.reminderTime) return;
-      var parts = t.reminderTime.split(":");
-      var target = new Date();
-      target.setHours(parseInt(parts[0],10), parseInt(parts[1],10), 0, 0);
-      var ms = target.getTime() - Date.now();
-      if(ms <= 0) return;
-      reminderTimers[t.id] = setTimeout(function(){ fireReminder(t); }, ms);
-    });
-  }
-  function fireReminder(task){
-    showToast("⏰ Reminder: " + task.text);
-    try{
-      if("Notification" in window){
-        if(Notification.permission === "granted"){
-          new Notification("Task reminder", { body: task.text });
-        } else if(Notification.permission !== "denied"){
-          Notification.requestPermission().then(function(perm){
-            if(perm === "granted") new Notification("Task reminder", { body: task.text });
-          });
-        }
-      }
-    }catch(e){}
-    try{ if(navigator.vibrate) navigator.vibrate([200,100,200]); }catch(e){}
-  }
-
-  async function persist(){ await saveDay(state.date, state.data); }
-
-  function addTinyTask(mainTask, text){
-    if(!text || !text.trim()) return;
-    if(!mainTask.subtasks) mainTask.subtasks = [];
-    mainTask.subtasks.push({id:uid(), text:text.trim(), done:false, priority:null});
-    persist(); renderMainTasks();
-    showToast('Added to "'+mainTask.text+'"');
-  }
-  function addMainTask(text){
-    if(!text || !text.trim()) return;
-    var newId = uid();
-    state.data.tasks.push({id:newId, originId:newId, text:text.trim(), done:false, label:"", priority:null, reminderTime:null, moveHistory:[], subtasks:[]});
-    persist(); renderMainTasks();
-    scheduleAllReminders();
-    showToast('Main task added');
-  }
-
-  function showToast(msg){
-    var t = document.getElementById("toast");
-    t.textContent = msg; t.classList.add("show");
-    clearTimeout(showToast._tm);
-    showToast._tm = setTimeout(function(){ t.classList.remove("show"); }, 1800);
-  }
-
-  function handleParsedSpeech(raw){
-    var text = raw.trim();
-    if(!text) return;
-    if(state.activeTarget){
-      var target = state.data.tasks.find(function(x){return x.id===state.activeTarget;});
-      if(target){ addTinyTask(target, text); return; }
-      state.activeTarget = null;
-    }
-    addMainTask(text);
-  }
-
-  function formatDateShort(dateStr){
-    var d = parseDate(dateStr);
-    var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    return months[d.getMonth()]+" "+d.getDate();
-  }
-
-  function openMenu(){ renderMenuMain(); document.getElementById("menuOverlay").classList.add("open"); }
-  function closeMenu(){ document.getElementById("menuOverlay").classList.remove("open"); }
-
-  function menuHeader(sheet, title, showBack){
-    var h = document.createElement("div"); h.className = "menu-title";
-    if(showBack){
-      var back = document.createElement("button"); back.className = "menu-back"; back.textContent = "←";
-      back.addEventListener("click", renderMenuMain);
-      h.appendChild(back);
-    }
-    var t = document.createElement("span"); t.textContent = title;
-    h.appendChild(t);
-    sheet.appendChild(h);
-  }
-
-  function renderMenuMain(){
-    var sheet = document.getElementById("menuSheet");
-    sheet.innerHTML = "";
-    menuHeader(sheet, "Menu", false);
-    var items = [
-      {icon:"🔍", label:"Search tasks", fn: renderMenuSearch},
-      {icon:"✅", label:"Completed history", fn: renderMenuCompleted},
-      {icon:"🗑️", label:"Deleted history", fn: renderMenuDeleted},
-      {icon:"🏷️", label:"Manage labels", fn: renderMenuLabels},
-    ];
-    items.forEach(function(it){
-      var b = document.createElement("button"); b.className = "menu-item";
-      b.innerHTML = '<span class="ic">'+it.icon+'</span><span>'+it.label+'</span>';
-      b.addEventListener("click", it.fn);
-      sheet.appendChild(b);
-    });
-    var close = document.createElement("button"); close.className = "picker-cancel"; close.textContent = "Close";
-    close.style.marginTop = "8px";
-    close.addEventListener("click", closeMenu);
-    sheet.appendChild(close);
-  }
-
-  function renderMenuSearch(){
-    var sheet = document.getElementById("menuSheet");
-    sheet.innerHTML = "";
-    menuHeader(sheet, "Search tasks", true);
-    var input = document.createElement("input"); input.className = "menu-search-input"; input.placeholder = "Type to search…";
-    sheet.appendChild(input);
-    var resultsWrap = document.createElement("div");
-    sheet.appendChild(resultsWrap);
-
-    function runSearch(){
-      var q = input.value.trim().toLowerCase();
-      resultsWrap.innerHTML = "";
-      if(!q){ return; }
-      var entries = getAllDayEntries();
-      var found = [];
-      entries.forEach(function(entry){
-        entry.data.tasks.forEach(function(t){
-          if(t.text.toLowerCase().indexOf(q) !== -1){
-            found.push({dateStr: entry.dateStr, text: t.text, done: t.done});
-          }
-          (t.subtasks||[]).forEach(function(st){
-            if(st.text.toLowerCase().indexOf(q) !== -1){
-              found.push({dateStr: entry.dateStr, text: t.text+" → "+st.text, done: st.done});
-            }
-          });
-        });
-      });
-      if(!found.length){
-        var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No matches";
-        resultsWrap.appendChild(e);
-        return;
-      }
-      found.forEach(function(r){
-        var row = document.createElement("div"); row.className = "menu-result" + (r.done ? " done":"");
-        var dateEl = document.createElement("div"); dateEl.className = "rdate"; dateEl.textContent = formatDateShort(r.dateStr);
-        var textEl = document.createElement("div"); textEl.className = "rtext"; textEl.textContent = r.text;
-        row.appendChild(dateEl); row.appendChild(textEl);
-        row.style.cursor = "pointer";
-        row.addEventListener("click", function(){
-          state.date = r.dateStr; closeMenu(); loadAndRender();
-        });
-        resultsWrap.appendChild(row);
-      });
-    }
-    input.addEventListener("input", runSearch);
-    input.focus();
-  }
-
-  function renderMenuCompleted(){
-    var sheet = document.getElementById("menuSheet");
-    sheet.innerHTML = "";
-    menuHeader(sheet, "Completed history", true);
-    var entries = getAllDayEntries();
-    var found = [];
-    entries.forEach(function(entry){
-      entry.data.tasks.forEach(function(t){
-        if(t.done) found.push({dateStr: entry.dateStr, text: t.text});
-      });
-    });
-    if(!found.length){
-      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No completed tasks yet";
-      sheet.appendChild(e);
-      return;
-    }
-    found.forEach(function(r){
-      var row = document.createElement("div"); row.className = "menu-result done"; row.style.cursor = "pointer";
-      var dateEl = document.createElement("div"); dateEl.className = "rdate"; dateEl.textContent = formatDateShort(r.dateStr);
-      var textEl = document.createElement("div"); textEl.className = "rtext"; textEl.textContent = r.text;
-      row.appendChild(dateEl); row.appendChild(textEl);
-      row.addEventListener("click", function(){ state.date = r.dateStr; closeMenu(); loadAndRender(); });
-      sheet.appendChild(row);
-    });
-  }
-
-  async function renderMenuDeleted(){
-    var sheet = document.getElementById("menuSheet");
-    sheet.innerHTML = "";
-    menuHeader(sheet, "Deleted history", true);
-    var list = await loadDeletedHistory();
-    if(!list.length){
-      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "Nothing deleted yet";
-      sheet.appendChild(e);
-      return;
-    }
-    list.slice().reverse().forEach(function(r){
-      var row = document.createElement("div"); row.className = "menu-result";
-      var when = new Date(r.deletedAt);
-      var dateEl = document.createElement("div"); dateEl.className = "rdate";
-      dateEl.textContent = "Was on " + formatDateShort(r.fromDate) + " · deleted " + when.toLocaleDateString();
-      var textEl = document.createElement("div"); textEl.className = "rtext";
-      textEl.textContent = r.text + (r.label ? "  ["+r.label+"]" : "");
-      row.appendChild(dateEl); row.appendChild(textEl);
-      sheet.appendChild(row);
-    });
-  }
-
-  async function renderMenuLabels(){
-    var sheet = document.getElementById("menuSheet");
-    sheet.innerHTML = "";
-    menuHeader(sheet, "Manage labels", true);
-    if(!knownLabels.length){
-      var e = document.createElement("div"); e.className = "menu-empty"; e.textContent = "No labels yet";
-      sheet.appendChild(e);
-      return;
-    }
-    knownLabels.slice().forEach(function(l){
-      var row = document.createElement("div"); row.className = "menu-label-row";
-      var name = document.createElement("div"); name.className = "lname"; name.textContent = l;
-      var editBtn = document.createElement("button"); editBtn.textContent = "✎";
-      editBtn.addEventListener("click", async function(){
-        var val = prompt("Rename label:", l);
-        if(val !== null && val.trim() && val.trim() !== l){
-          await renameLabelEverywhere(l, val.trim());
-          renderMenuLabels(); renderMainTasks();
-        }
-      });
-      var delBtn = document.createElement("button"); delBtn.textContent = "✕";
-      delBtn.addEventListener("click", async function(){
-        if(!confirm('Delete label "'+l+'"? It will be removed from all tasks using it.')) return;
-        await deleteLabelEverywhere(l);
-        renderMenuLabels(); renderMainTasks(); populateFilterOptions();
-      });
-      row.appendChild(name); row.appendChild(editBtn); row.appendChild(delBtn);
-      sheet.appendChild(row);
-    });
-  }
-
-  document.getElementById("menuBtn").addEventListener("click", openMenu);
-  document.getElementById("menuOverlay").addEventListener("click", function(e){
-    if(e.target.id === "menuOverlay") closeMenu();
+  return { mainTasks: [] };
+}
+function findMain(mainId){
+  var day = getDayMutable(dateKey(currentDate));
+  return day.mainTasks.find(function(t){ return t.id===mainId; });
+}
+function findTiny(mainId, tinyId){
+  var t = findMain(mainId);
+  if (!t) return null;
+  return (t.tinyTasks||[]).find(function(x){ return x.id===tinyId; });
+}
+function sortByPriority(arr){
+  return arr.slice().sort(function(a,b){
+    var ap=a.priority, bp=b.priority;
+    if (ap!=null && bp!=null) return ap-bp;
+    if (ap!=null) return -1;
+    if (bp!=null) return 1;
+    return 0;
   });
-  document.getElementById("pickerOverlay").addEventListener("click", function(e){
-    if(e.target.id === "pickerOverlay") e.target.classList.remove("open");
-  });
+}
 
-  document.getElementById("prevDay").addEventListener("click", function(){ shiftDay(-1); });
-  document.getElementById("nextDay").addEventListener("click", function(){ shiftDay(1); });
-  document.getElementById("todayBtn").addEventListener("click", function(){ state.date = todayStr(); loadAndRender(); });
-  document.getElementById("labelFilterSelect").addEventListener("change", function(e){
-    state.filterLabel = e.target.value; renderMainTasks();
+/* ================= mutations ================= */
+function addMainTask(text){
+  text = text.trim(); if (!text) return;
+  var day = getDayMutable(dateKey(currentDate));
+  day.mainTasks.push({ id: genId(), text: text, done:false, label:null, priority:null, reminderTime:null, tinyTasks:[], moveHistory:[] });
+  markDirty(); renderTaskList();
+}
+function addTinyTask(mainId, text){
+  text = text.trim(); if (!text) return;
+  var t = findMain(mainId); if (!t) return;
+  t.tinyTasks = t.tinyTasks||[];
+  t.tinyTasks.push({ id: genId(), text: text, done:false, priority:null });
+  markDirty(); renderTaskList();
+}
+function toggleMainDone(mainId, checked){
+  var t = findMain(mainId); if (!t) return;
+  t.done = checked; markDirty(); renderTaskList();
+}
+function toggleTinyDone(mainId, tinyId, checked){
+  var tt = findTiny(mainId, tinyId); if (!tt) return;
+  tt.done = checked; markDirty(); renderTaskList();
+}
+function editMainText(mainId, text){
+  var t = findMain(mainId); if (!t) return;
+  text = text.trim(); if (!text) text = t.text;
+  if (t.text!==text){ t.text=text; markDirty(); }
+}
+function editTinyText(mainId, tinyId, text){
+  var tt = findTiny(mainId, tinyId); if (!tt) return;
+  text = text.trim(); if (!text) text = tt.text;
+  if (tt.text!==text){ tt.text=text; markDirty(); }
+}
+function setMainLabel(mainId, label){
+  var t = findMain(mainId); if (!t) return;
+  t.label = label||null; markDirty(); renderTaskList(); renderLabelFilterOptions();
+}
+function addLabelToList(name){
+  name = name.trim(); if (!name) return;
+  var list = blob.data['labels:list'] = blob.data['labels:list']||[];
+  if (list.indexOf(name)===-1){ list.push(name); markDirty(); }
+}
+function renameLabel(oldName, newName){
+  newName = newName.trim(); if (!newName || newName===oldName) return;
+  var list = blob.data['labels:list'] = blob.data['labels:list']||[];
+  var idx = list.indexOf(oldName);
+  if (idx>=0) list[idx]=newName; else list.push(newName);
+  allDiaryKeys().forEach(function(k){
+    blob.data[dayKeyOf(k)].mainTasks.forEach(function(t){ if (t.label===oldName) t.label=newName; });
   });
-  document.getElementById("textAdd").addEventListener("keydown", function(e){
-    if(e.key==="Enter"){ var val = e.target.value; e.target.value = ""; handleParsedSpeech(val); }
+  markDirty();
+}
+function deleteLabel(name){
+  var list = blob.data['labels:list'] = blob.data['labels:list']||[];
+  var idx = list.indexOf(name);
+  if (idx>=0) list.splice(idx,1);
+  allDiaryKeys().forEach(function(k){
+    blob.data[dayKeyOf(k)].mainTasks.forEach(function(t){ if (t.label===name) t.label=null; });
   });
+  markDirty();
+}
+function setPriority(mainId, kind, tinyId, value){
+  var t = findMain(mainId); if (!t) return;
+  if (kind==='main') t.priority = value;
+  else { var tt=findTiny(mainId,tinyId); if (tt) tt.priority=value; }
+  markDirty(); renderTaskList();
+}
+function setReminder(mainId, value){
+  var t = findMain(mainId); if (!t) return;
+  t.reminderTime = value||null; markDirty(); renderTaskList();
+}
+function recordDeletedSnapshot(entry){
+  var list = blob.data['history:deleted'] = blob.data['history:deleted']||[];
+  list.unshift(entry); markDirty();
+}
+function deleteMain(mainId){
+  var t = findMain(mainId); if (!t) return;
+  if (!confirm('Delete "'+t.text+'"? This will be recorded in Deleted history.')) return;
+  var day = getDayMutable(dateKey(currentDate));
+  var idx = day.mainTasks.findIndex(function(x){ return x.id===mainId; });
+  if (idx<0) return;
+  recordDeletedSnapshot({
+    type:'main', text:t.text, label:t.label,
+    tinyTasks:(t.tinyTasks||[]).map(function(x){ return x.text; }),
+    date: dateKey(currentDate), deletedAt: Date.now()
+  });
+  day.mainTasks.splice(idx,1);
+  if (openTinyAddFor===mainId) openTinyAddFor=null;
+  markDirty(); renderTaskList();
+}
+function deleteTiny(mainId, tinyId){
+  var t = findMain(mainId); if (!t) return;
+  var idx = (t.tinyTasks||[]).findIndex(function(x){ return x.id===tinyId; });
+  if (idx<0) return;
+  var tt = t.tinyTasks[idx];
+  recordDeletedSnapshot({ type:'tiny', text:tt.text, parentText:t.text, date: dateKey(currentDate), deletedAt: Date.now() });
+  t.tinyTasks.splice(idx,1);
+  markDirty(); renderTaskList();
+}
+function moveMain(mainId, newDateKeyStr){
+  if (!newDateKeyStr) return;
+  var oldKey = dateKey(currentDate);
+  if (newDateKeyStr===oldKey) return;
+  var day = getDayMutable(oldKey);
+  var idx = day.mainTasks.findIndex(function(x){ return x.id===mainId; });
+  if (idx<0) return;
+  var t = day.mainTasks[idx];
+  day.mainTasks.splice(idx,1);
+  t.moveHistory = t.moveHistory||[];
+  t.moveHistory.push({ from: oldKey, to: newDateKeyStr, timestamp: Date.now() });
+  var destDay = getDayMutable(newDateKeyStr);
+  destDay.mainTasks.push(t);
+  markDirty(); renderTaskList();
+  toast('Moved to '+newDateKeyStr);
+}
 
-  var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var micBtn = document.getElementById("micBtn");
-  var voiceStatus = document.getElementById("voiceStatus");
-  if(SpeechRec){
-    var rec = new SpeechRec();
-    rec.lang = "en-IN"; rec.interimResults = true; rec.maxAlternatives = 1;
-    var listening = false;
-    rec.onstart = function(){ listening = true; micBtn.classList.add("listening"); voiceStatus.textContent = "Listening…"; };
-    rec.onresult = function(e){
-      var text = ""; for(var i=0;i<e.results.length;i++){ text += e.results[i][0].transcript; }
-      voiceStatus.textContent = text;
-    };
-    rec.onerror = function(){ voiceStatus.textContent = ""; showToast("Couldn't hear that — try again"); };
-    rec.onend = function(){
-      listening = false; micBtn.classList.remove("listening");
-      var finalText = voiceStatus.textContent; voiceStatus.textContent = "";
-      if(finalText) handleParsedSpeech(finalText);
-    };
-    micBtn.addEventListener("click", function(){
-      if(listening){ rec.stop(); return; }
-      try{ rec.start(); }catch(err){}
+/* ================= search / history queries ================= */
+function searchAll(query){
+  query = query.toLowerCase().trim();
+  if (!query) return [];
+  var results = [];
+  allDiaryKeys().forEach(function(k){
+    var day = blob.data[dayKeyOf(k)];
+    day.mainTasks.forEach(function(t){
+      if (t.text.toLowerCase().indexOf(query)>=0) results.push({date:k, type:'main', text:t.text});
+      (t.tinyTasks||[]).forEach(function(tt){
+        if (tt.text.toLowerCase().indexOf(query)>=0) results.push({date:k, type:'tiny', text:tt.text, parent:t.text});
+      });
     });
+  });
+  results.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  return results;
+}
+function getCompletedAll(){
+  var results = [];
+  allDiaryKeys().forEach(function(k){
+    blob.data[dayKeyOf(k)].mainTasks.forEach(function(t){
+      if (t.done) results.push({ date:k, text:t.text, label:t.label });
+    });
+  });
+  results.sort(function(a,b){ return b.date.localeCompare(a.date); });
+  return results;
+}
+
+/* ================= rendering ================= */
+var dateNumEl=document.getElementById('dateNum'), dateMonEl=document.getElementById('dateMon'),
+    weekdayEl=document.getElementById('weekdayLbl'), yearEl=document.getElementById('yearLbl'),
+    todayBtn=document.getElementById('todayBtn'), taskListEl=document.getElementById('taskList'),
+    labelFilterEl=document.getElementById('labelFilter'), textInput=document.getElementById('textInput'),
+    micBtn=document.getElementById('micBtn'), syncStatusEl=document.getElementById('syncStatus');
+
+function renderAll(){
+  renderDateHeader();
+  renderLabelFilterOptions();
+  renderTaskList();
+  renderSyncStatus();
+}
+function renderDateHeader(){
+  dateNumEl.textContent = currentDate.getDate();
+  dateMonEl.textContent = currentDate.toLocaleString('en-US',{month:'short'}).toUpperCase();
+  weekdayEl.textContent = currentDate.toLocaleString('en-US',{weekday:'long'});
+  yearEl.textContent = currentDate.getFullYear();
+  todayBtn.classList.toggle('active', dateKey(currentDate)===dateKey(new Date()));
+}
+function renderLabelFilterOptions(){
+  var labels = blob.data['labels:list']||[];
+  var prev = labelFilterEl.value;
+  labelFilterEl.innerHTML = '<option value="">All</option>' + labels.map(function(l){
+    return '<option value="'+escapeAttr(l)+'">'+escapeHtml(l)+'</option>';
+  }).join('');
+  if (labels.indexOf(prev)>=0) labelFilterEl.value = prev;
+  else currentLabelFilter='';
+}
+function tinyRowHtml(mainId, tiny){
+  return '<div class="tiny-task '+(tiny.done?'done':'')+'" data-id="'+tiny.id+'">'
+    + '<input type="checkbox" class="tt-check" '+(tiny.done?'checked':'')+'>'
+    + '<span class="tt-text" contenteditable="true" spellcheck="false">'+escapeHtml(tiny.text)+'</span>'
+    + '<button class="tt-pri-btn" title="Priority">'+(tiny.priority!=null?tiny.priority:'#')+'</button>'
+    + '<button class="tt-del-btn" title="Delete">&#128465;</button>'
+    + '</div>';
+}
+function mainRowHtml(task){
+  var histBtn = (task.moveHistory && task.moveHistory.length) ?
+    '<button class="icon-btn hist-btn" title="Move history">&#128337;<span class="badge">'+task.moveHistory.length+'</span></button>' : '';
+  var tinyHtml = sortByPriority(task.tinyTasks||[]).map(function(tt){ return tinyRowHtml(task.id, tt); }).join('');
+  var addRow = (openTinyAddFor===task.id) ?
+    '<div class="tiny-add-row">Adding tiny task here&hellip; use the box below or mic <button class="cancel-tiny-add">&times;</button></div>' : '';
+  var remLabel = task.reminderTime ? (' '+task.reminderTime) : '';
+  return '<div class="main-task '+(task.done?'done':'')+'" data-id="'+task.id+'">'
+    + '<div class="mt-row">'
+    +   '<input type="checkbox" class="mt-check" '+(task.done?'checked':'')+'>'
+    +   '<span class="mt-text" contenteditable="true" spellcheck="false">'+escapeHtml(task.text)+'</span>'
+    +   '<div class="mt-actions">'
+    +     '<button class="icon-btn tag-btn" title="Label">&#127991;</button>'
+    +     '<button class="icon-btn pri-btn" title="Priority">'+(task.priority!=null?task.priority:'#')+'</button>'
+    +     '<button class="icon-btn rem-btn" title="Reminder">&#128340;'+remLabel+'</button>'
+    +     '<button class="icon-btn move-btn" title="Move to date">&#128197;</button>'
+    +     histBtn
+    +     '<button class="icon-btn add-tiny-btn" title="Add tiny task">+</button>'
+    +     '<button class="icon-btn del-btn" title="Delete">&#128465;</button>'
+    +   '</div>'
+    + '</div>'
+    + (task.label ? '<div class="mt-label-chip">'+escapeHtml(task.label)+'</div>' : '')
+    + '<div class="tiny-list">'+tinyHtml+'</div>'
+    + addRow
+    + '</div>';
+}
+function renderTaskList(){
+  var key = dateKey(currentDate);
+  var day = getOrCreateDayForView(key);
+  var tasks = day.mainTasks;
+  if (currentLabelFilter) tasks = tasks.filter(function(t){ return t.label===currentLabelFilter; });
+  tasks = sortByPriority(tasks);
+  if (tasks.length===0){
+    taskListEl.innerHTML = '<div class="empty-state">No tasks yet — add one below, or tap the mic and speak.</div>';
+    return;
+  }
+  taskListEl.innerHTML = tasks.map(mainRowHtml).join('');
+}
+function renderSyncStatus(){
+  if (!localStorage.getItem(K.clientId)){
+    syncStatusEl.innerHTML = '<button id="statusSetupBtn">Set up Drive sync</button>';
+    var b=document.getElementById('statusSetupBtn'); if(b) b.onclick=openSetupPanel;
+  } else if (needsReauth || !getValidToken()){
+    syncStatusEl.innerHTML = '<button id="statusSignInBtn">Sign in with Google</button>';
+    var b2=document.getElementById('statusSignInBtn'); if(b2) b2.onclick=doSignIn;
   } else {
-    micBtn.addEventListener("click", function(){ showToast("Voice input isn't supported in this browser — try Chrome"); });
+    syncStatusEl.textContent = 'Synced';
   }
+}
+function setSyncStatus(msg){
+  if (needsReauth) return; /* never let a generic message clobber the sign-in prompt */
+  syncStatusEl.textContent = msg;
+}
 
-  (async function boot(){
-    try{
-      blob = loadLocalCache();
-      knownLabels = await loadKnownLabels();
-      populateFilterOptions();
-      await loadAndRender();
-      setTimeout(initDriveSync, 300);
-    }catch(e){
-      document.getElementById("syncStatus").textContent = "Something went wrong loading today — try reloading";
-      var hint = document.createElement("div");
-      hint.style.cssText = "font-size:11px;color:var(--ink-soft);margin:4px 2px;";
-      hint.textContent = String(e && e.message || e);
-      document.getElementById("mainTasks").before(hint);
+/* ================= toast ================= */
+function toast(msg, ms){
+  ms = ms||3000;
+  var c = document.getElementById('toastContainer');
+  var el = document.createElement('div');
+  el.className='toast'; el.textContent = msg;
+  c.appendChild(el);
+  requestAnimationFrame(function(){ el.classList.add('show'); });
+  setTimeout(function(){ el.classList.remove('show'); setTimeout(function(){ el.remove(); }, 300); }, ms);
+}
+
+/* ================= bottom sheet ================= */
+var sheetOverlay=document.getElementById('sheetOverlay'), sheetTitle=document.getElementById('sheetTitle'), sheetBody=document.getElementById('sheetBody');
+function openSheet(title, html){
+  sheetTitle.textContent = title;
+  sheetBody.innerHTML = html;
+  sheetOverlay.classList.add('open');
+}
+function closeSheet(){ sheetOverlay.classList.remove('open'); sheetBody.innerHTML=''; }
+sheetOverlay.addEventListener('click', function(e){ if (e.target===sheetOverlay) closeSheet(); });
+
+function openLabelPicker(mainId){
+  var task = findMain(mainId); if (!task) return;
+  var labels = blob.data['labels:list']||[];
+  var options = ['No label'].concat(labels);
+  var html = options.map(function(l){
+    var val = (l==='No label') ? '' : l;
+    var selected = (val==='' && !task.label) || (task.label===val && val!=='');
+    return '<button class="sheet-option '+(selected?'selected':'')+'" data-label="'+escapeAttr(val)+'">'+escapeHtml(l)+'</button>';
+  }).join('') + '<button class="sheet-option new-label-btn">+ New label&hellip;</button>';
+  openSheet('Choose label', html);
+  sheetBody.querySelectorAll('.sheet-option[data-label]').forEach(function(btn){
+    btn.onclick = function(){ setMainLabel(mainId, btn.getAttribute('data-label')||null); closeSheet(); };
+  });
+  var nb = sheetBody.querySelector('.new-label-btn');
+  if (nb) nb.onclick = function(){ openNewLabelInput(mainId); };
+}
+function openNewLabelInput(mainId){
+  openSheet('New label', '<input id="newLabelInput" type="text" placeholder="Label name" autofocus><button id="saveNewLabelBtn">Add</button>');
+  var input = document.getElementById('newLabelInput');
+  document.getElementById('saveNewLabelBtn').onclick = function(){
+    var val = input.value.trim();
+    if (val){ addLabelToList(val); setMainLabel(mainId, val); renderLabelFilterOptions(); }
+    closeSheet();
+  };
+  setTimeout(function(){ input.focus(); }, 50);
+}
+function openPriorityPicker(mainId, kind, tinyId){
+  var current = kind==='main' ? findMain(mainId).priority : findTiny(mainId,tinyId).priority;
+  openSheet('Set priority (1 = highest)',
+    '<input id="priInput" type="number" min="1" max="99" inputmode="numeric" value="'+(current!=null?current:'')+'">'
+    + '<div><button id="priSaveBtn">Save</button><button id="priClearBtn">Clear</button></div>');
+  document.getElementById('priSaveBtn').onclick = function(){
+    var v = parseInt(document.getElementById('priInput').value,10);
+    setPriority(mainId, kind, tinyId, isNaN(v)?null:v);
+    closeSheet();
+  };
+  document.getElementById('priClearBtn').onclick = function(){ setPriority(mainId, kind, tinyId, null); closeSheet(); };
+}
+function openReminderPicker(mainId){
+  var task = findMain(mainId); if (!task) return;
+  openSheet('Reminder for today',
+    '<input id="remInput" type="time" value="'+(task.reminderTime||'')+'">'
+    + '<div><button id="remSaveBtn">Save</button><button id="remClearBtn">Clear</button></div>'
+    + '<p style="font-size:12.5px;color:var(--ink-soft);margin-top:10px;">This only fires while this tab stays open in your browser — a plain webpage can\'t wake itself up in the background. Close the tab and it won\'t alert you.</p>');
+  document.getElementById('remSaveBtn').onclick = function(){
+    var v = document.getElementById('remInput').value;
+    if (v && window.Notification && Notification.permission==='default') Notification.requestPermission();
+    setReminder(mainId, v||null);
+    closeSheet();
+  };
+  document.getElementById('remClearBtn').onclick = function(){ setReminder(mainId, null); closeSheet(); };
+}
+function openMovePicker(mainId){
+  var input = document.createElement('input');
+  input.type='date'; input.value=dateKey(currentDate);
+  input.style.position='fixed'; input.style.opacity='0'; input.style.pointerEvents='none'; input.style.left='-9999px';
+  document.body.appendChild(input);
+  input.addEventListener('change', function(){
+    moveMain(mainId, input.value);
+    document.body.removeChild(input);
+  });
+  if (input.showPicker){ try{ input.showPicker(); }catch(e){ input.click(); } } else { input.click(); }
+}
+function openMoveHistory(mainId){
+  var task = findMain(mainId); if (!task) return;
+  var hist = task.moveHistory||[];
+  var html = hist.length ? hist.map(function(m){
+    return '<div class="hist-row">'+m.from+' &rarr; '+m.to+'<div class="hist-time">'+new Date(m.timestamp).toLocaleString()+'</div></div>';
+  }).join('') : '<p class="empty">No moves yet.</p>';
+  openSheet('Move history', html);
+}
+
+/* ================= voice + text input ================= */
+var recognition = null;
+var SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRec){
+  recognition = new SpeechRec();
+  recognition.lang = 'en-IN';
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+  recognition.onresult = function(e){
+    var transcript = e.results[0][0].transcript;
+    handleInputSubmit(transcript);
+  };
+  recognition.onerror = function(){ micBtn.classList.remove('listening'); };
+  recognition.onend = function(){ micBtn.classList.remove('listening'); };
+}
+function handleInputSubmit(text){
+  text = (text||'').trim(); if (!text) return;
+  if (openTinyAddFor) addTinyTask(openTinyAddFor, text);
+  else addMainTask(text);
+  textInput.value='';
+}
+micBtn.addEventListener('click', function(){
+  if (!recognition){ toast('Voice input not supported in this browser'); return; }
+  try{ recognition.start(); micBtn.classList.add('listening'); }catch(e){}
+});
+textInput.addEventListener('keydown', function(e){
+  if (e.key==='Enter'){ e.preventDefault(); handleInputSubmit(textInput.value); }
+});
+
+/* ================= task list event delegation ================= */
+taskListEl.addEventListener('click', function(e){
+  var mainEl = e.target.closest('.main-task'); if (!mainEl) return;
+  var mainId = mainEl.getAttribute('data-id');
+  if (e.target.closest('.tag-btn')) openLabelPicker(mainId);
+  else if (e.target.closest('.tt-pri-btn')){
+    var tinyEl = e.target.closest('.tiny-task');
+    openPriorityPicker(mainId, 'tiny', tinyEl.getAttribute('data-id'));
+  }
+  else if (e.target.closest('.pri-btn')) openPriorityPicker(mainId, 'main', null);
+  else if (e.target.closest('.rem-btn')) openReminderPicker(mainId);
+  else if (e.target.closest('.move-btn')) openMovePicker(mainId);
+  else if (e.target.closest('.hist-btn')) openMoveHistory(mainId);
+  else if (e.target.closest('.add-tiny-btn')){
+    openTinyAddFor = (openTinyAddFor===mainId) ? null : mainId;
+    textInput.placeholder = openTinyAddFor ? 'Add tiny task…' : 'Add a task or tap mic…';
+    renderTaskList();
+    textInput.focus();
+  }
+  else if (e.target.closest('.cancel-tiny-add')){
+    openTinyAddFor = null; textInput.placeholder='Add a task or tap mic…'; renderTaskList();
+  }
+  else if (e.target.closest('.tt-del-btn')){
+    var tinyEl2 = e.target.closest('.tiny-task');
+    deleteTiny(mainId, tinyEl2.getAttribute('data-id'));
+  }
+  else if (e.target.closest('.del-btn')) deleteMain(mainId);
+});
+taskListEl.addEventListener('change', function(e){
+  var mainEl = e.target.closest('.main-task'); if (!mainEl) return;
+  var mainId = mainEl.getAttribute('data-id');
+  if (e.target.classList.contains('mt-check')) toggleMainDone(mainId, e.target.checked);
+  else if (e.target.classList.contains('tt-check')){
+    var tinyEl = e.target.closest('.tiny-task');
+    toggleTinyDone(mainId, tinyEl.getAttribute('data-id'), e.target.checked);
+  }
+});
+taskListEl.addEventListener('focusout', function(e){
+  var mainEl = e.target.closest('.main-task'); if (!mainEl) return;
+  var mainId = mainEl.getAttribute('data-id');
+  if (e.target.classList.contains('mt-text')) editMainText(mainId, e.target.textContent);
+  else if (e.target.classList.contains('tt-text')){
+    var tinyEl = e.target.closest('.tiny-task');
+    editTinyText(mainId, tinyEl.getAttribute('data-id'), e.target.textContent);
+  }
+});
+taskListEl.addEventListener('keydown', function(e){
+  if ((e.target.classList.contains('mt-text') || e.target.classList.contains('tt-text')) && e.key==='Enter'){
+    e.preventDefault(); e.target.blur();
+  }
+});
+
+/* ================= navigation ================= */
+document.getElementById('prevDayBtn').onclick = function(){ currentDate = addDays(currentDate,-1); openTinyAddFor=null; renderAll(); };
+document.getElementById('nextDayBtn').onclick = function(){ currentDate = addDays(currentDate,1); openTinyAddFor=null; renderAll(); };
+document.getElementById('todayBtn').onclick = function(){ currentDate = startOfToday(); openTinyAddFor=null; renderAll(); };
+labelFilterEl.addEventListener('change', function(){ currentLabelFilter = labelFilterEl.value; renderTaskList(); });
+
+/* ================= side menu ================= */
+var overlay=document.getElementById('overlay'), sidePanel=document.getElementById('sidePanel'), menuBody=document.getElementById('menuBody');
+function openMenu(){ overlay.classList.add('open'); sidePanel.classList.add('open'); showMenuSection('search'); }
+function closeMenu(){ overlay.classList.remove('open'); sidePanel.classList.remove('open'); }
+document.getElementById('menuBtn').onclick = openMenu;
+document.getElementById('closeMenuBtn').onclick = closeMenu;
+overlay.addEventListener('click', closeMenu);
+document.querySelectorAll('.menu-nav button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('.menu-nav button').forEach(function(b){ b.classList.remove('active'); });
+    btn.classList.add('active');
+    showMenuSection(btn.getAttribute('data-section'));
+  });
+});
+function showMenuSection(section){
+  if (section==='search') renderSearchSection();
+  else if (section==='completed') renderCompletedSection();
+  else if (section==='deleted') renderDeletedSection();
+  else if (section==='labels') renderLabelsSection();
+  else if (section==='sync'){ closeMenu(); openSetupPanel(); }
+}
+function renderSearchSection(){
+  menuBody.innerHTML = '<input id="searchInput" type="text" placeholder="Search tasks…"><div id="searchResults"></div>';
+  var input = document.getElementById('searchInput');
+  input.addEventListener('input', function(){ renderSearchResults(searchAll(input.value)); });
+  setTimeout(function(){ input.focus(); }, 50);
+}
+function renderSearchResults(results){
+  var el = document.getElementById('searchResults'); if (!el) return;
+  if (results.length===0){ el.innerHTML=''; return; }
+  el.innerHTML = results.map(function(r){
+    return '<button class="search-result" data-date="'+r.date+'">'+(r.type==='tiny'?'&#8618; ':'')+escapeHtml(r.text)+'<span class="sr-date">'+r.date+'</span></button>';
+  }).join('');
+  el.querySelectorAll('.search-result').forEach(function(b){
+    b.onclick = function(){ currentDate = parseDateKey(b.getAttribute('data-date')); closeMenu(); openTinyAddFor=null; renderAll(); };
+  });
+}
+function renderCompletedSection(){
+  var items = getCompletedAll();
+  menuBody.innerHTML = items.length ? items.map(function(i){
+    return '<div class="hist-row"><s>'+escapeHtml(i.text)+'</s><span class="sr-date">'+i.date+'</span>'+(i.label?' <span class="mt-label-chip small">'+escapeHtml(i.label)+'</span>':'')+'</div>';
+  }).join('') : '<p class="empty">No completed tasks yet.</p>';
+}
+function renderDeletedSection(){
+  var items = blob.data['history:deleted']||[];
+  menuBody.innerHTML = items.length ? items.map(function(i){
+    if (i.type==='main'){
+      return '<div class="hist-row"><b>'+escapeHtml(i.text)+'</b><span class="sr-date">'+i.date+'</span>'
+        + (i.label?' ['+escapeHtml(i.label)+']':'')
+        + (i.tinyTasks && i.tinyTasks.length ? '<div class="del-tiny">tiny: '+i.tinyTasks.map(escapeHtml).join(', ')+'</div>' : '')
+        + '<div class="del-time">deleted '+new Date(i.deletedAt).toLocaleString()+'</div></div>';
+    } else {
+      return '<div class="hist-row">&#8618; '+escapeHtml(i.text)+'<span class="sr-date">'+i.date+'</span>'
+        + '<div class="del-tiny">from: '+escapeHtml(i.parentText||'')+'</div>'
+        + '<div class="del-time">deleted '+new Date(i.deletedAt).toLocaleString()+'</div></div>';
     }
-  })();
+  }).join('') : '<p class="empty">No deleted items.</p>';
+}
+function renderLabelsSection(){
+  var labels = blob.data['labels:list']||[];
+  menuBody.innerHTML = labels.length ? labels.map(function(l){
+    return '<div class="label-row"><span>'+escapeHtml(l)+'</span>'
+      + '<button class="rename-label-btn" data-label="'+escapeAttr(l)+'">Rename</button>'
+      + '<button class="delete-label-btn" data-label="'+escapeAttr(l)+'">Delete</button></div>';
+  }).join('') : '<p class="empty">No labels yet.</p>';
+  menuBody.querySelectorAll('.rename-label-btn').forEach(function(b){
+    b.onclick = function(){
+      var oldName = b.getAttribute('data-label');
+      openSheet('Rename label', '<input id="renameLabelInput" type="text" value="'+escapeAttr(oldName)+'"><button id="renameLabelSaveBtn">Save</button>');
+      document.getElementById('renameLabelSaveBtn').onclick = function(){
+        var nn = document.getElementById('renameLabelInput').value.trim();
+        if (nn) renameLabel(oldName, nn);
+        closeSheet(); renderLabelsSection(); renderAll();
+      };
+    };
+  });
+  menuBody.querySelectorAll('.delete-label-btn').forEach(function(b){
+    b.onclick = function(){
+      var name = b.getAttribute('data-label');
+      if (confirm('Delete label "'+name+'"? It will be cleared from every task using it.')){
+        deleteLabel(name); renderLabelsSection(); renderAll();
+      }
+    };
+  });
+}
+
+/* ================= reminders ================= */
+function checkReminders(){
+  var now = new Date();
+  var nowHM = pad2(now.getHours())+':'+pad2(now.getMinutes());
+  var todayKeyStr = dateKey(now);
+  var day = blob.data[dayKeyOf(todayKeyStr)];
+  if (!day) return;
+  day.mainTasks.forEach(function(t){
+    if (t.reminderTime && !t.done && t.reminderTime===nowHM){
+      var fireKey = todayKeyStr+'-'+t.id+'-'+t.reminderTime;
+      if (!firedReminders.has(fireKey)){ firedReminders.add(fireKey); fireReminder(t); }
+    }
+  });
+}
+function fireReminder(t){
+  toast('⏰ Reminder: '+t.text, 6000);
+  if (navigator.vibrate) navigator.vibrate([200,100,200]);
+  if (window.Notification && Notification.permission==='granted'){
+    try{ new Notification('Diary To-Do Reminder', { body: t.text }); }catch(e){}
+  }
+}
+setInterval(checkReminders, 15000);
+
+/* ================= Google Drive sync ================= */
+function getValidToken(){
+  var t = localStorage.getItem(K.accessToken);
+  var exp = Number(localStorage.getItem(K.tokenExpiry)||0);
+  if (t && Date.now() < (exp - 60000)) return t;
+  return null;
+}
+function clearToken(){
+  localStorage.removeItem(K.accessToken);
+  localStorage.removeItem(K.tokenExpiry);
+}
+function parseAuthRedirect(){
+  if (location.hash && location.hash.indexOf('access_token')>=0){
+    var params = new URLSearchParams(location.hash.slice(1));
+    var token = params.get('access_token');
+    var expiresIn = params.get('expires_in');
+    if (token){
+      var expiryTs = Date.now() + Number(expiresIn||3600)*1000;
+      localStorage.setItem(K.accessToken, token);
+      localStorage.setItem(K.tokenExpiry, String(expiryTs));
+      needsReauth = false;
+      toast('Signed in with Google');
+    }
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+function buildAuthUrl(){
+  var clientId = localStorage.getItem(K.clientId);
+  if (!clientId){ toast('Enter your Google OAuth Client ID first'); openSetupPanel(); return null; }
+  var redirectUri = location.origin + location.pathname;
+  var params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: 'https://www.googleapis.com/auth/drive.file',
+    prompt: 'consent',
+    include_granted_scopes: 'true'
+  });
+  return 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
+}
+function doSignIn(){
+  var url = buildAuthUrl();
+  if (url) window.location.href = url;
+}
+function handleAuthError(){
+  clearToken();
+  needsReauth = true;
+  renderSyncStatus();
+  updateSetupStatus();
+}
+function driveFetch(url, opts){
+  opts = opts || {};
+  var token = getValidToken();
+  if (!token){ needsReauth = true; renderSyncStatus(); return Promise.reject(new Error('NO_TOKEN')); }
+  var headers = Object.assign({}, opts.headers||{}, { Authorization: 'Bearer '+token });
+  return fetch(url, Object.assign({}, opts, { headers: headers })).then(function(res){
+    if (res.status===401){ handleAuthError(); throw new Error('AUTH_REQUIRED'); }
+    return res;
+  });
+}
+function ensureDriveFile(){
+  var fileId = localStorage.getItem(K.driveFileId);
+  if (fileId) return Promise.resolve(fileId);
+  var q = encodeURIComponent("name='"+DRIVE_FILE_NAME+"' and trashed=false");
+  return driveFetch('https://www.googleapis.com/drive/v3/files?q='+q+'&spaces=drive&fields=files(id,name)')
+    .then(function(res){ return res.json(); })
+    .then(function(json){
+      if (json.files && json.files.length>0) return json.files[0].id;
+      return driveFetch('https://www.googleapis.com/drive/v3/files', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ name: DRIVE_FILE_NAME })
+      }).then(function(res){ return res.json(); }).then(function(created){
+        return driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+created.id+'?uploadType=media', {
+          method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(blob)
+        }).then(function(){ return created.id; });
+      });
+    })
+    .then(function(id){ localStorage.setItem(K.driveFileId, id); return id; });
+}
+function doPush(keepalive){
+  return ensureDriveFile().then(function(fileId){
+    return driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media', {
+      method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(blob), keepalive: !!keepalive
+    });
+  }).then(function(){
+    dirty = false;
+    setSyncStatus('Synced '+new Date().toLocaleTimeString());
+  });
+}
+function doPull(){
+  if (dirty) return doPush(false);
+  var fileId;
+  return ensureDriveFile().then(function(id){
+    fileId = id;
+    return driveFetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?alt=media');
+  }).then(function(res){
+    if (res.status===404){
+      localStorage.removeItem(K.driveFileId);
+      return ensureDriveFile().then(function(){ return null; });
+    }
+    return res.json();
+  }).then(function(remote){
+    if (!remote || typeof remote.updatedAt!=='number') return;
+    if (remote.updatedAt > blob.updatedAt){
+      blob = remote;
+      persistLocalCache();
+      renderAll();
+      setSyncStatus('Synced '+new Date().toLocaleTimeString());
+    } else if (blob.updatedAt > remote.updatedAt){
+      /* local has a genuinely newer edit (e.g. dirty flag reset on reload) — must push it, not just sit on it */
+      return doPush(false);
+    } else {
+      setSyncStatus('Up to date');
+    }
+  });
+}
+function enqueue(fn){
+  var run = function(){ return fn().catch(function(err){
+    if (err.message!=='AUTH_REQUIRED' && err.message!=='NO_TOKEN') setSyncStatus('Sync error, will retry');
+  }); };
+  syncQueue = syncQueue.then(run, run);
+  return syncQueue;
+}
+function pushNow(){
+  if (getValidToken()) needsReauth = false;
+  return enqueue(function(){ return doPush(false); });
+}
+function pullNow(){
+  if (getValidToken()) needsReauth = false;
+  return enqueue(function(){ return doPull(); });
+}
+function flushImmediate(){
+  clearTimeout(pushTimer);
+  if (dirty && getValidToken()) enqueue(function(){ return doPush(true); });
+}
+document.addEventListener('visibilitychange', function(){
+  if (document.hidden) flushImmediate();
+  else if (getValidToken()) pullNow();
+});
+window.addEventListener('pagehide', flushImmediate);
+function startPeriodicSync(){
+  setInterval(function(){ if (!document.hidden && getValidToken()) pullNow(); }, 20000);
+}
+
+/* ================= setup panel ================= */
+var setupOverlay=document.getElementById('setupOverlay');
+function openSetupPanel(){
+  document.getElementById('setupClientIdInput').value = localStorage.getItem(K.clientId)||'';
+  document.getElementById('setupRedirectUri').textContent = location.origin + location.pathname;
+  updateSetupStatus();
+  setupOverlay.classList.add('open');
+}
+function closeSetupPanel(){ setupOverlay.classList.remove('open'); }
+function updateSetupStatus(){
+  var el = document.getElementById('setupStatusLine');
+  if (getValidToken()) el.textContent = 'Connected to Google Drive.';
+  else if (needsReauth) el.textContent = 'Sign-in required (token expired or revoked).';
+  else el.textContent = 'Not connected yet.';
+}
+document.getElementById('setupOpenBtn').onclick = openSetupPanel;
+document.getElementById('setupCloseBtn').onclick = closeSetupPanel;
+setupOverlay.addEventListener('click', function(e){ if (e.target===setupOverlay) closeSetupPanel(); });
+document.getElementById('setupSaveBtn').onclick = function(){
+  var v = document.getElementById('setupClientIdInput').value.trim();
+  if (v){ localStorage.setItem(K.clientId, v); toast('Client ID saved'); renderSyncStatus(); updateSetupStatus(); }
+};
+document.getElementById('setupSignInBtn').onclick = doSignIn;
+document.getElementById('setupSyncNowBtn').onclick = function(){ toast('Syncing…'); pullNow().then(updateSetupStatus); };
+document.getElementById('setupDisconnectBtn').onclick = function(){
+  clearToken();
+  localStorage.removeItem(K.driveFileId);
+  needsReauth = false;
+  renderSyncStatus(); updateSetupStatus();
+  toast('Disconnected from Drive');
+};
+document.getElementById('setupCopyBtn').onclick = function(){
+  var text = document.getElementById('setupRedirectUri').textContent;
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){ toast('Copied'); });
+};
+
+/* ================= init ================= */
+function init(){
+  parseAuthRedirect();
+  renderAll();
+  if (getValidToken()){ pullNow(); startPeriodicSync(); }
+}
+if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
 })();
 </script>
 </body>
