@@ -314,7 +314,7 @@ body{
       <button id="todayBtn" class="today-btn">Today</button>
       <button id="nextDayBtn" class="nav-arrow" aria-label="Next day">&#8250;</button>
     </div>
-    <button id="setupOpenBtn" class="icon-round-btn" aria-label="Drive sync" title="Drive sync">&#9729;</button>
+    <button id="setupOpenBtn" class="icon-round-btn" aria-label="Sync settings" title="Sync settings">&#9729;</button>
   </header>
 
   <div class="filter-bar">
@@ -342,7 +342,7 @@ body{
     <button data-section="completed">Completed</button>
     <button data-section="deleted">Deleted</button>
     <button data-section="labels">Manage labels</button>
-    <button data-section="sync">Drive sync</button>
+    <button data-section="sync">Sync settings</button>
   </div>
   <div class="menu-body" id="menuBody"></div>
 </div>
@@ -357,20 +357,16 @@ body{
 <div id="setupOverlay" class="setup-overlay">
   <div class="setup-box">
     <button class="close-x" id="setupCloseBtn">&times;</button>
-    <h2>Google Drive Sync Setup</h2>
-    <p style="font-size:13.5px;color:var(--ink-soft)">One-time per device. Paste the OAuth Client ID you created in Google Cloud Console.</p>
-    <label for="setupClientIdInput">OAuth Client ID</label>
-    <input id="setupClientIdInput" type="text" placeholder="xxxxxxxxxx.apps.googleusercontent.com">
+    <h2>Sync Settings</h2>
+    <p style="font-size:13.5px;color:var(--ink-soft)">One-time per device. Enter the address of your own sync server (running on your PC, reachable over Tailscale) and the secret key it printed when you started it.</p>
+    <label for="setupServerUrlInput">Sync server URL</label>
+    <input id="setupServerUrlInput" type="text" placeholder="https://your-pc-name.your-tailnet.ts.net">
+    <label for="setupSecretKeyInput">Secret key</label>
+    <input id="setupSecretKeyInput" type="text" placeholder="paste the key the server printed">
     <div class="row">
-      <button id="setupSaveBtn" class="btn-primary">Save Client ID</button>
-    </div>
-    <label>This exact URL must be added to BOTH "Authorized JavaScript origins" (without the trailing path) AND "Authorized redirect URIs" (full, with trailing slash) in your Google Cloud OAuth Client:</label>
-    <div class="row">
-      <div class="uri-box" id="setupRedirectUri"></div>
-      <button id="setupCopyBtn" class="btn-secondary">Copy</button>
+      <button id="setupSaveBtn" class="btn-primary">Save &amp; Connect</button>
     </div>
     <div class="row" style="margin-top:14px;">
-      <button id="setupSignInBtn" class="btn-primary">Sign in with Google</button>
       <button id="setupSyncNowBtn" class="btn-secondary">Sync now</button>
       <button id="setupDisconnectBtn" class="btn-secondary">Disconnect</button>
     </div>
@@ -387,12 +383,9 @@ body{
 /* ================= storage keys ================= */
 var K = {
   blob: 'diaryTodo.blob.v1',
-  clientId: 'diaryTodo.gClientId',
-  accessToken: 'diaryTodo.gToken',
-  tokenExpiry: 'diaryTodo.gTokenExpiry',
-  driveFileId: 'diaryTodo.gFileId'
+  serverUrl: 'diaryTodo.syncServerUrl',
+  secretKey: 'diaryTodo.syncSecretKey'
 };
-var DRIVE_FILE_NAME = 'diary-todo-sync.json';
 
 /* ================= date helpers ================= */
 function pad2(n){ return String(n).padStart(2,'0'); }
@@ -410,7 +403,7 @@ function escapeAttr(s){ return escapeHtml(s); }
 var currentDate = startOfToday();
 var blob = loadBlobFromCache();
 var dirty = false;
-var needsReauth = false;
+var syncBroken = false;
 var currentLabelFilter = '';
 var openTinyAddFor = null;
 var firedReminders = new Set();
@@ -724,18 +717,18 @@ function renderTaskList(){
   taskListEl.innerHTML = tasks.map(mainRowHtml).join('');
 }
 function renderSyncStatus(){
-  if (!localStorage.getItem(K.clientId)){
-    syncStatusEl.innerHTML = '<button id="statusSetupBtn">Set up Drive sync</button>';
+  if (!isConfigured()){
+    syncStatusEl.innerHTML = '<button id="statusSetupBtn">Set up sync</button>';
     var b=document.getElementById('statusSetupBtn'); if(b) b.onclick=openSetupPanel;
-  } else if (needsReauth || !getValidToken()){
-    syncStatusEl.innerHTML = '<button id="statusSignInBtn">Sign in with Google</button>';
-    var b2=document.getElementById('statusSignInBtn'); if(b2) b2.onclick=doSignIn;
+  } else if (syncBroken){
+    syncStatusEl.innerHTML = '<button id="statusSetupBtn" style="color:var(--accent);border-color:var(--accent)">Sync unreachable</button>';
+    var b2=document.getElementById('statusSetupBtn'); if(b2) b2.onclick=openSetupPanel;
   } else {
     syncStatusEl.textContent = 'Synced';
   }
 }
 function setSyncStatus(msg){
-  if (needsReauth) return; /* never let a generic message clobber the sign-in prompt */
+  if (syncBroken) return; /* never let a generic message clobber the "unreachable" indicator */
   syncStatusEl.textContent = msg;
 }
 
@@ -1028,108 +1021,48 @@ function fireReminder(t){
 }
 setInterval(checkReminders, 15000);
 
-/* ================= Google Drive sync ================= */
-function getValidToken(){
-  var t = localStorage.getItem(K.accessToken);
-  var exp = Number(localStorage.getItem(K.tokenExpiry)||0);
-  if (t && Date.now() < (exp - 60000)) return t;
-  return null;
+/* ================= self-hosted sync (own PC via Tailscale) ================= */
+function getServerUrl(){
+  var u = (localStorage.getItem(K.serverUrl)||'').trim();
+  return u ? u.replace(/\/+$/,'') : null;
 }
-function clearToken(){
-  localStorage.removeItem(K.accessToken);
-  localStorage.removeItem(K.tokenExpiry);
+function getSecretKey(){
+  var k = (localStorage.getItem(K.secretKey)||'').trim();
+  return k || null;
 }
-function parseAuthRedirect(){
-  if (location.hash && location.hash.indexOf('access_token')>=0){
-    var params = new URLSearchParams(location.hash.slice(1));
-    var token = params.get('access_token');
-    var expiresIn = params.get('expires_in');
-    if (token){
-      var expiryTs = Date.now() + Number(expiresIn||3600)*1000;
-      localStorage.setItem(K.accessToken, token);
-      localStorage.setItem(K.tokenExpiry, String(expiryTs));
-      needsReauth = false;
-      toast('Signed in with Google');
-    }
-    history.replaceState(null, '', location.pathname + location.search);
-  }
-}
-function buildAuthUrl(){
-  var clientId = localStorage.getItem(K.clientId);
-  if (!clientId){ toast('Enter your Google OAuth Client ID first'); openSetupPanel(); return null; }
-  var redirectUri = location.origin + location.pathname;
-  var params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: 'token',
-    scope: 'https://www.googleapis.com/auth/drive.file',
-    prompt: 'consent',
-    include_granted_scopes: 'true'
-  });
-  return 'https://accounts.google.com/o/oauth2/v2/auth?' + params.toString();
-}
-function doSignIn(){
-  var url = buildAuthUrl();
-  if (url) window.location.href = url;
-}
-function handleAuthError(){
-  clearToken();
-  needsReauth = true;
-  renderSyncStatus();
-  updateSetupStatus();
-}
-function driveFetch(url, opts){
+function isConfigured(){ return !!(getServerUrl() && getSecretKey()); }
+function serverFetch(path, opts){
   opts = opts || {};
-  var token = getValidToken();
-  if (!token){ needsReauth = true; renderSyncStatus(); return Promise.reject(new Error('NO_TOKEN')); }
-  var headers = Object.assign({}, opts.headers||{}, { Authorization: 'Bearer '+token });
-  return fetch(url, Object.assign({}, opts, { headers: headers })).then(function(res){
-    if (res.status===401){ handleAuthError(); throw new Error('AUTH_REQUIRED'); }
+  var url = getServerUrl(), key = getSecretKey();
+  if (!url || !key) return Promise.reject(new Error('NOT_CONFIGURED'));
+  var headers = Object.assign({}, opts.headers||{}, { 'X-Sync-Key': key });
+  return fetch(url + path, Object.assign({}, opts, { headers: headers })).then(function(res){
+    if (res.status===401 || res.status===403){
+      syncBroken = true; renderSyncStatus(); updateSetupStatus();
+      throw new Error('AUTH_REQUIRED');
+    }
     return res;
   });
 }
-function ensureDriveFile(){
-  var fileId = localStorage.getItem(K.driveFileId);
-  if (fileId) return Promise.resolve(fileId);
-  var q = encodeURIComponent("name='"+DRIVE_FILE_NAME+"' and trashed=false");
-  return driveFetch('https://www.googleapis.com/drive/v3/files?q='+q+'&spaces=drive&fields=files(id,name)')
-    .then(function(res){ return res.json(); })
-    .then(function(json){
-      if (json.files && json.files.length>0) return json.files[0].id;
-      return driveFetch('https://www.googleapis.com/drive/v3/files', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ name: DRIVE_FILE_NAME })
-      }).then(function(res){ return res.json(); }).then(function(created){
-        return driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+created.id+'?uploadType=media', {
-          method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(blob)
-        }).then(function(){ return created.id; });
-      });
-    })
-    .then(function(id){ localStorage.setItem(K.driveFileId, id); return id; });
-}
 function doPush(keepalive){
-  return ensureDriveFile().then(function(fileId){
-    return driveFetch('https://www.googleapis.com/upload/drive/v3/files/'+fileId+'?uploadType=media', {
-      method:'PATCH', headers:{'Content-Type':'application/json'}, body: JSON.stringify(blob), keepalive: !!keepalive
-    });
-  }).then(function(){
+  return serverFetch('/sync', {
+    method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(blob), keepalive: !!keepalive
+  }).then(function(res){
+    if (!res.ok) throw new Error('PUSH_FAILED');
     dirty = false;
+    syncBroken = false;
     setSyncStatus('Synced '+new Date().toLocaleTimeString());
+    updateSetupStatus();
   });
 }
 function doPull(){
   if (dirty) return doPush(false);
-  var fileId;
-  return ensureDriveFile().then(function(id){
-    fileId = id;
-    return driveFetch('https://www.googleapis.com/drive/v3/files/'+fileId+'?alt=media');
-  }).then(function(res){
-    if (res.status===404){
-      localStorage.removeItem(K.driveFileId);
-      return ensureDriveFile().then(function(){ return null; });
-    }
+  return serverFetch('/sync', { method:'GET' }).then(function(res){
+    if (!res.ok) throw new Error('PULL_FAILED');
     return res.json();
   }).then(function(remote){
+    syncBroken = false;
+    updateSetupStatus();
     if (!remote || typeof remote.updatedAt!=='number') return;
     if (remote.updatedAt > blob.updatedAt){
       blob = remote;
@@ -1146,73 +1079,77 @@ function doPull(){
 }
 function enqueue(fn){
   var run = function(){ return fn().catch(function(err){
-    if (err.message!=='AUTH_REQUIRED' && err.message!=='NO_TOKEN') setSyncStatus('Sync error, will retry');
+    if (err.message==='AUTH_REQUIRED') return;
+    if (err.message==='NOT_CONFIGURED') return;
+    /* transient failure (PC off, Tailscale down, network hiccup) — quietly retry on the next cycle */
+    syncBroken = true; renderSyncStatus(); updateSetupStatus();
   }); };
   syncQueue = syncQueue.then(run, run);
   return syncQueue;
 }
 function pushNow(){
-  if (getValidToken()) needsReauth = false;
+  if (!isConfigured()) return Promise.resolve();
   return enqueue(function(){ return doPush(false); });
 }
 function pullNow(){
-  if (getValidToken()) needsReauth = false;
+  if (!isConfigured()) return Promise.resolve();
   return enqueue(function(){ return doPull(); });
 }
 function flushImmediate(){
   clearTimeout(pushTimer);
-  if (dirty && getValidToken()) enqueue(function(){ return doPush(true); });
+  if (dirty && isConfigured()) enqueue(function(){ return doPush(true); });
 }
 document.addEventListener('visibilitychange', function(){
   if (document.hidden) flushImmediate();
-  else if (getValidToken()) pullNow();
+  else if (isConfigured()) pullNow();
 });
 window.addEventListener('pagehide', flushImmediate);
 function startPeriodicSync(){
-  setInterval(function(){ if (!document.hidden && getValidToken()) pullNow(); }, 20000);
+  setInterval(function(){ if (!document.hidden && isConfigured()) pullNow(); }, 20000);
 }
 
 /* ================= setup panel ================= */
 var setupOverlay=document.getElementById('setupOverlay');
 function openSetupPanel(){
-  document.getElementById('setupClientIdInput').value = localStorage.getItem(K.clientId)||'';
-  document.getElementById('setupRedirectUri').textContent = location.origin + location.pathname;
+  document.getElementById('setupServerUrlInput').value = localStorage.getItem(K.serverUrl)||'';
+  document.getElementById('setupSecretKeyInput').value = localStorage.getItem(K.secretKey)||'';
   updateSetupStatus();
   setupOverlay.classList.add('open');
 }
 function closeSetupPanel(){ setupOverlay.classList.remove('open'); }
 function updateSetupStatus(){
   var el = document.getElementById('setupStatusLine');
-  if (getValidToken()) el.textContent = 'Connected to Google Drive.';
-  else if (needsReauth) el.textContent = 'Sign-in required (token expired or revoked).';
-  else el.textContent = 'Not connected yet.';
+  if (!isConfigured()) el.textContent = 'Not connected yet.';
+  else if (syncBroken) el.textContent = 'Can\'t reach the sync server right now (check the PC is on and Tailscale is connected).';
+  else el.textContent = 'Connected to your sync server.';
 }
 document.getElementById('setupOpenBtn').onclick = openSetupPanel;
 document.getElementById('setupCloseBtn').onclick = closeSetupPanel;
 setupOverlay.addEventListener('click', function(e){ if (e.target===setupOverlay) closeSetupPanel(); });
 document.getElementById('setupSaveBtn').onclick = function(){
-  var v = document.getElementById('setupClientIdInput').value.trim();
-  if (v){ localStorage.setItem(K.clientId, v); toast('Client ID saved'); renderSyncStatus(); updateSetupStatus(); }
+  var url = document.getElementById('setupServerUrlInput').value.trim();
+  var key = document.getElementById('setupSecretKeyInput').value.trim();
+  if (!url || !key){ toast('Enter both the server URL and the secret key'); return; }
+  localStorage.setItem(K.serverUrl, url);
+  localStorage.setItem(K.secretKey, key);
+  syncBroken = false;
+  renderSyncStatus(); updateSetupStatus();
+  toast('Saved — connecting…');
+  pullNow().then(function(){ startPeriodicSync(); updateSetupStatus(); });
 };
-document.getElementById('setupSignInBtn').onclick = doSignIn;
 document.getElementById('setupSyncNowBtn').onclick = function(){ toast('Syncing…'); pullNow().then(updateSetupStatus); };
 document.getElementById('setupDisconnectBtn').onclick = function(){
-  clearToken();
-  localStorage.removeItem(K.driveFileId);
-  needsReauth = false;
+  localStorage.removeItem(K.serverUrl);
+  localStorage.removeItem(K.secretKey);
+  syncBroken = false;
   renderSyncStatus(); updateSetupStatus();
-  toast('Disconnected from Drive');
-};
-document.getElementById('setupCopyBtn').onclick = function(){
-  var text = document.getElementById('setupRedirectUri').textContent;
-  if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){ toast('Copied'); });
+  toast('Disconnected from sync server');
 };
 
 /* ================= init ================= */
 function init(){
-  parseAuthRedirect();
   renderAll();
-  if (getValidToken()){ pullNow(); startPeriodicSync(); }
+  if (isConfigured()){ pullNow(); startPeriodicSync(); }
 }
 if (document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
 else init();
